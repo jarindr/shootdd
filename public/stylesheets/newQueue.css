@@ -1,0 +1,14 @@
+#basic-addon1{
+    cursor: pointer;
+}
+.button_increase{
+float: right; cursor: pointer;-webkit-user-select: none;
+}
+.button_decrease{
+	float: right; 
+	cursor: pointer;
+	webkit-user-select: none;
+}
+.value_equip{
+	width: 25px;height: 25px; text-align: center; float: right; margin: 0 10px;
+}
