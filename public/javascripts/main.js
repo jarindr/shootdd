@@ -181,22 +181,7 @@ $(document).ready(function() {
                     "<div role='tabpanel' class='tab-pane fade' id='profile'>" + rent_code + "</div> " +
                     "</div> " +
                     "</div>");
-                if ($('#assignment_selector').val() != 'Onscreen room') {
-                    html2.appendTo(ac);
-                } else {
-                    html = $("<div class='form-group'>" +
-                        "<label class='col-sm-2 control-label'>Studio type :</label>" +
-                        "<div class='checkbox col-sm-2' style='margin-right: -50px;'>" +
-                        "<label> <input type='checkbox'> With lighting Prophoto</label> </div> " +
-                        "<div class='checkbox col-sm-2'> " +
-                        "<label> " +
-                        "<input type='checkbox'> With lighting BronColor</label> " +
-                        "<label> " +
-                        "<input type='checkbox'> No lighting </label> " +
-                        "</div> " +
-                        "</div>");
-                    html.appendTo(ac);
-                }
+                html2.appendTo(ac);
                 firstTime = false;
             }
             ac.hide().show('slow');
@@ -289,6 +274,31 @@ $(document).ready(function() {
                 "</div>"
             );
             dummy.appendTo($('#room-group-form').empty()).hide().show('slow');
+            html = $("<div class='form-group'>" +
+                "<label class='col-sm-2 control-label'>Studio type :</label>" +
+                "<div class='checkbox col-sm-2' style='margin-right: -100px;'>" +
+                "<label> <input type='checkbox'> With Mac</label> </div> " +
+                "<div class='checkbox col-sm-2'> " +
+                "<label> " +
+                "<input type='checkbox'> Without Mac</label> " +
+                "</div> " +
+                "</div>");
+            html.appendTo($(".panel-group").find(".form-group").empty());
+        } else {
+            html = $("<div class='form-group'>" +
+                "<label class='col-sm-2 control-label'>Studio type :</label>" +
+                "<div class='checkbox col-sm-2' style='margin-right: 0'>" +
+                "<label> <input type='checkbox'checked='true'> With lighting Prophoto</label> </div> " +
+                "<div class='checkbox col-sm-2'> " +
+                "<label> " +
+                "<input type='checkbox'> With lighting Broncolor</label> " +
+                "</div> " +
+                "<div class='checkbox col-sm-2'> " +
+                "<label> " +
+                "<input type='checkbox'> No lighting </label> " +
+                "</div> " +
+                "</div>");
+            html.appendTo($(".panel-group").find(".form-group").empty());
         }
 
     });

@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var faker = require('faker');
 var mysql = require('mysql');
+var connection = createConnection();
 /* GET login  page. */
 router.get('/', function(req, res, next) {
     res.render('index');
@@ -10,19 +11,16 @@ router.get('/', function(req, res, next) {
 //
 //get add new booking page
 router.get('/newQueue', function(req, res, next) {
-    var connection = createConnection();
     connection.query('SELECT COUNT(*) AS count FROM booking ', function(err, row, field) {
         var id = getQuotationID(row);
         res.render('newQueue', {
             data: id
         });
-
     });
-    connection.end();
 });
 router.post('/newQueue', function(req, res, next) {});
 router.get('/dump_equipment_data', function(req, res, next) {
-    var connection = createConnection();
+
     var query = "SELECT *,COUNT(Description) AS count FROM equipment GROUP BY Description ORDER BY type";
     connection.query(query, function(err, rows, fields) {
         res.send(rows);
@@ -31,7 +29,6 @@ router.get('/dump_equipment_data', function(req, res, next) {
 });
 //get add show queues page
 router.get('/queues', function(req, res, next) {
-    var connection = createConnection();
     var query = "SELECT QID,client,Job_description,photographer," +
         "DATE_FORMAT(shooting_date_start,'%Y-%m-%d') shooting_date_start," +
         "DATE_FORMAT(shooting_date_end,'%Y-%m-%d') shooting_date_end," +
@@ -54,17 +51,20 @@ router.get('/confirm_create_queue', function(req, res, next) {
 
 });
 
-router.get('/view_edit', function(req, res, next) {
-    var connection = createConnection();
+router.get('/dump_equipment_data_unique', function(req, res, next) {
+    var query = "SELECT * FROM equipment";
+    connection.query(query, function(err, rows, fields) {
+        res.send(rows);
+    });
+});
+router.get('/close_job', function(req, res, next) {
     var QID = req.session.QID;
     router.get('/dump_equipment_qid', function(req, res, next) {
-        var connection = createConnection();
         var QID_dump = req.session.QID;
         var query = "SELECT name_equipment,amount FROM booking_use_n_equip WHERE booking_use_n_equip.QID=" + "'" + QID_dump + "'";
         connection.query(query, function(err, rows, fields) {
             res.send(rows);
         });
-        connection.end();
     });
     var query = "SELECT " +
         "booking.QID,booking.client," +
@@ -84,7 +84,46 @@ router.get('/view_edit', function(req, res, next) {
         if (err) {
             console.log("can't select choosen queue with error " + err);
         } else {
-            connection.end();
+            console.log(row);
+            res.render('close_job', {
+                selected: row
+            });
+
+
+        }
+
+    });
+
+
+});
+router.get('/view_edit', function(req, res, next) {
+    var QID = req.session.QID;
+    router.get('/dump_equipment_qid', function(req, res, next) {
+        var QID_dump = req.session.QID;
+        var query = "SELECT name_equipment,amount FROM booking_use_n_equip WHERE booking_use_n_equip.QID=" + "'" + QID_dump + "'";
+        connection.query(query, function(err, rows, fields) {
+            res.send(rows);
+        });
+    });
+    var query = "SELECT " +
+        "booking.QID,booking.client," +
+        "booking.Job_description," +
+        "booking.photographer," +
+        "DATE_FORMAT(shooting_date_start,'%d-%m-%Y %a') shooting_date_start," +
+        "DATE_FORMAT(shooting_date_end,'%a %d-%m-%Y') shooting_date_end," +
+        "booking.time_start,booking.time_end,booking.status,booking.assignment,assistance.assistance,room.room_name" +
+        " FROM (booking LEFT JOIN assistance " +
+        "ON booking.QID=assistance.QID)" +
+        " LEFT JOIN (booking_use_room INNER JOIN room ON booking_use_room.RID=room.RID)" +
+        "ON booking_use_room.QID=booking.QID " +
+        "WHERE booking.QID=" + "'" + QID + "'" +
+        " ORDER BY booking.shooting_date_start";
+    var query_equip = "SELECT name_equipment,amount FROM booking_use_n_equip WHERE booking_use_n_equip.QID=" + "'" + QID + "'";
+    connection.query(query, function(err, row, fields) {
+        if (err) {
+            console.log("can't select choosen queue with error " + err);
+        } else {
+
             console.log(row);
             res.render('view_edit', {
                 selected: row
@@ -96,22 +135,20 @@ router.get('/view_edit', function(req, res, next) {
     });
 
 
-})
+});
 router.post('/view_edit', function(req, res, next) {
     req.session.QID = req.query.QID;
     res.redirect('view_edit');
 });
 router.get('/view', function(req, res, next) {
-    var connection = createConnection();
     var QID = req.session.QID;
     router.get('/dump_equipment_qid', function(req, res, next) {
-        var connection = createConnection();
+
         var QID_dump = req.session.QID;
         var query = "SELECT name_equipment,amount FROM booking_use_n_equip WHERE booking_use_n_equip.QID=" + "'" + QID_dump + "'";
         connection.query(query, function(err, rows, fields) {
             res.send(rows);
         });
-        connection.end();
     });
     var query = "SELECT " +
         "booking.QID,booking.client," +
@@ -126,12 +163,11 @@ router.get('/view', function(req, res, next) {
         "ON booking_use_room.QID=booking.QID " +
         "WHERE booking.QID=" + "'" + QID + "'" +
         " ORDER BY booking.shooting_date_start";
-    var query_equip = "SELECT name_equipment,amount FROM booking_use_n_equip WHERE booking_use_n_equip.QID=" + "'" + QID + "'";
     connection.query(query, function(err, row, fields) {
         if (err) {
             console.log("can't select choosen queue with error " + err);
         } else {
-            connection.end();
+
             res.render('view', {
                 selected: row
             });
@@ -142,10 +178,10 @@ router.get('/view', function(req, res, next) {
     });
 
 
-})
+});
 router.get('/equipment_table', function(req, res, next) {
     console.log("equipment_list router connected");
-    var connection = createConnection();
+
     var catagories = req.query.catagories; // the catagories the selected
     var count = req.query.count; // boolean value that show count or not 
     if (count == 'false') { // if count == false means that we show the unique type. 
@@ -158,14 +194,14 @@ router.get('/equipment_table', function(req, res, next) {
             res.render('equipment_table', {
                 equip: rows
             });
-            connection.end();
+
         });
     }
 
 });
 router.get('/equipment_table_count', function(req, res, next) {
     console.log("equipment_table_count router connected");
-    var connection = createConnection();
+
     var catagories = req.query.catagories;
     var count = req.query.count;
     connection.query('SELECT *,COUNT(Description) AS count FROM equipment WHERE type=' + '"' + catagories + '"' + " GROUP BY Description", function(err, rows, fields) {
@@ -176,7 +212,7 @@ router.get('/equipment_table_count', function(req, res, next) {
             res.render('equipment_table_count', {
                 equip: rows
             });
-            connection.end();
+
         }
     });
 
@@ -190,10 +226,8 @@ router.get('/equipment_list', function(req, res, next) {
 
 });
 router.get('/queue_table', function(req, res, next) {
-
     var sort_type = req.query.data;
     var query;
-    var connection = createConnection();
     query = "SELECT " +
         "booking.QID,booking.client," +
         "booking.Job_description," +
@@ -269,12 +303,8 @@ router.get('/queue_table', function(req, res, next) {
         }
         res.render('queue_table', {
             data: rows
-
         });
-        connection.end();
     });
-
-
 
 });
 router.post('/queue_table', function(req, res, next) {
@@ -319,7 +349,7 @@ function getQuotationID(row) {
 }
 router.post('/confirm_create_queue', function(req, res, next) {
     console.log("confirm_create_queue connected");
-    var connection = createConnection();
+
     console.log("POST HAVE BEEN CALLED");
     connection.query('SELECT COUNT(*) AS count FROM booking ', function(err, row, field) {
         var id = getQuotationID(row);
@@ -341,15 +371,10 @@ router.post('/confirm_create_queue', function(req, res, next) {
             res.redirect('error');
         }
         var ast = {
-                assistance: req.body.assistant_form1,
-                QID: id,
-                type: "shootdee"
-            }
-            //var equip={
-            // QID:id,
-            //name_equipment:name,
-            // amount:amount
-            // }
+            assistance: req.body.assistant_form1,
+            QID: id,
+            type: "shootdee"
+        }
         var nRoom = 0;
         var nAss = 0;
         var roomArray = [];
@@ -409,9 +434,6 @@ router.post('/confirm_create_queue', function(req, res, next) {
                         });
                     }
                 });
-
-
-
             }
 
         });

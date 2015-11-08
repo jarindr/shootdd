@@ -14,8 +14,8 @@ var firstTime = true; //more detail clicked first time?
 var moreDetailClick = false; // check weather the more detail clicked yet
 var click = false;
 var equip_amount = [];
-var runner = 0;
 var auto_add_detail = true; // set value of auto add detail button click
+var description = {};
 $(document).ready(function() {
     setMenuClicked();
     $(".btn").mouseup(function() {
@@ -25,6 +25,7 @@ $(document).ready(function() {
         $.each(data, function(key, value) {
             var type = value.type;
             typeArray.push(type);
+            description[value.description] = [];
         });
         typeArray = typeArray.filter(function(item, pos) { // make unique
             return typeArray.indexOf(item) == pos;
@@ -41,7 +42,7 @@ $(document).ready(function() {
             }
             k = 0;
         }
-        $.getJSON('http://localhost:3000/dump_equipment_qid', function(data_equip_qid) { // get current left over of qid equipment
+        $.getJSON('http://localhost:3000/dump_equipment_qid', function(data_equip_qid) { // get current use of qid equipment
             mapEquip = {};
             $.each(data_equip_qid, function(key, value) {
                 mapEquip[$.trim(value.name_equipment)] = value.amount;
@@ -58,9 +59,15 @@ $(document).ready(function() {
                 }
                 k = 0;
             }
-            if (auto_add_detail) {
-                $("#add_detail").click();
-            }
+            $.getJSON('http://localhost:3000/dump_equipment_data_unique', function(equip_unique_data) {
+                $(equip_unique_data).each(function(index, el) {
+                    description[el.description].push(el.EID);
+                });
+                if (auto_add_detail) {
+                    $("#add_detail").click();
+                }
+            });
+
 
         });
 
@@ -80,7 +87,7 @@ $(document).ready(function() {
     $("#room-group-form").on('click', '#add_room', function() { //set adding room
         var html = $("<div class='form-group'><label class='col-sm-2 control-label'></label>" +
             "<div class='col-sm-5'>" +
-            "<select class='form-control' id='room_selector" + room_counter + "'" + "name='room_selector" + room_counter + "'>" +
+            "<select class='form-control' id='room_selector" + room_counter + "'" + "name='room_selector" + room_counter + "' disabled>" +
             "<option value='rs01'>Studio room S</option>" +
             "<option value='rs02'>Studio room M</option>" +
             "<option value='rs03'>Studio room L</option>" +
@@ -89,13 +96,13 @@ $(document).ready(function() {
             "</select>" +
             "</div>" +
             "<div class='col-sm-1'>" +
-            "<button type='button' class='btn btn-default' id='delete_room'>-</button>" +
             "</div>" +
             "</div>");
         html.appendTo("#room-group-form");
         html.hide().show('fast');
         room_counter++;
     });
+
     $("#room-group-form").on("click", "#delete_room", function() { // set binding event to room-group-form delete out 
         $(this).parent().parent().hide('fast');
     });
@@ -122,7 +129,7 @@ $(document).ready(function() {
                 var codes = "";
                 var nType = 0;
                 html = $("<div class='col-sm-12' style='margin-bottom:20px;-webkit-box-shadow: 0px 1px 0px 0px rgba(173,173,173,1); -moz-box-shadow: 0px 1px 0px 0px rgba(173,173,173,1);box-shadow: 0px 1px 0px 0px rgba(173,173,173,1);'>" +
-                    "<h1>More detail</h1></div>");
+                    "<h1>Equipment check list</h1></div>");
                 html.appendTo(ac);
                 html = "";
                 var indexTypeArray = 0;
@@ -159,23 +166,22 @@ $(document).ready(function() {
                             "</a> " +
                             "</h4> " +
                             "</div> " +
-                            "<div id='collapse" + nType + "' class='panel-collapse collapse' role='tabpanel'" +
+                            "<div id='collapse" + nType + "' class='panel-collapse collapse in' role='tabpanel'" +
                             "aria-labelledby='heading" + nType + "'> " +
                             "<ul class='list-group'> ";
                         for (var x = 0; x < equipArray[nType].length; x++) {
-                            if (count[nType][x] == 0) {
-                                codes += "<li class='list-group-item' style='color:#979696; background-color:#C0C0C0;'>" + equipArray[nType][x] +
-                                    "<div id='button' class='button_decrease'> + </div> " +
-                                    "<input type='text' class='value_equip' value=" + "'" + count[nType][x] + "'> " +
-                                    "<div id='button' class='button_increase'> - </div></li> ";
-                            } else {
-                                codes += "<li class='list-group-item'>" + equipArray[nType][x] +
-                                    "<div id='button' class='button_decrease'> + </div> " +
-                                    "<input type='text' class='value_equip' value=" + "'" + count[nType][x] + "'> " +
-                                    "<div id='button' class='button_increase'> - </div></li> ";
-                            }
+                            if (count[nType][x] != 0) {
+                                codes += "<li class='list-group-item'>" + equipArray[nType][x];
+                                for (var c = 0; c < count[nType][x]; c++) {
+                                    codes += "<select class='form-control'>";
+                                    for (var k = 0; k < description[equipArray[nType][x]].length; k++) {
+                                        codes += "<option>" + description[equipArray[nType][x]][k] + "</option>";
+                                    }
+                                    codes += "</select>";
+                                }
+                                codes += "</li>";
 
-                            runner++;
+                            }
                         }
                         codes += "</ul></div></div>";
                         nType++;
@@ -184,7 +190,7 @@ $(document).ready(function() {
                         }
                     }
 
-                    codes = codes + "</div>";
+                    codes += "</div>";
 
                 }
                 html2 = $("<div class='form-group'>" +
@@ -228,13 +234,13 @@ $(document).ready(function() {
                 }
                 firstTime = false;
             }
+            $("#description-toggle").click();
             ac.hide().show('slow');
         } else {
             ac.hide('fast');
             $(this).text("More detail");
         }
     });
-
     $(document).on("click", "#button", function() { // accordion for binding event click on + - button update value
         var $button = $(this);
         var oldValue = $button.parent().find("input").val();
@@ -250,18 +256,6 @@ $(document).ready(function() {
         }
 
         $button.parent().find("input").val(newVal);
-        if (newVal == "0") {
-            $button.parent().css({
-                "color": "#979696",
-                "background-color": "#C0C0C0"
-            });
-        } else {
-            $button.parent().css({
-                "color": "black",
-                "background-color": "white"
-            });
-
-        }
 
 
     });

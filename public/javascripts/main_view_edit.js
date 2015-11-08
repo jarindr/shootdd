@@ -159,20 +159,16 @@ $(document).ready(function() {
                             "</a> " +
                             "</h4> " +
                             "</div> " +
-                            "<div id='collapse" + nType + "' class='panel-collapse collapse' role='tabpanel'" +
+                            "<div id='collapse" + nType + "' class='panel-collapse collapse in' role='tabpanel'" +
                             "aria-labelledby='heading" + nType + "'> " +
                             "<ul class='list-group'> ";
                         for (var x = 0; x < equipArray[nType].length; x++) {
                             if (count[nType][x] == 0) {
-                                codes += "<li class='list-group-item' style='color:red; background-color:#C0C0C0;'>" + equipArray[nType][x] +
-                                    "<div id='button' class='button_decrease'> + </div> " +
-                                    "<input type='text' class='value_equip' value=" + "'" + count[nType][x] + "'> " +
-                                    "<div id='button' class='button_increase'> - </div></li> ";
+                                codes += "<li class='list-group-item' style='color:#979696; background-color:#C0C0C0; display:none;'>" + equipArray[nType][x] +
+                                    "<input type='text' class='value_equip' value=" + "'" + count[nType][x] + "' disabled> ";
                             } else {
                                 codes += "<li class='list-group-item'>" + equipArray[nType][x] +
-                                    "<div id='button' class='button_decrease'> + </div> " +
-                                    "<input type='text' class='value_equip' value=" + "'" + count[nType][x] + "'> " +
-                                    "<div id='button' class='button_increase'> - </div></li> ";
+                                    "<input type='text' class='value_equip' value=" + "'" + count[nType][x] + "' disabled> ";
                             }
 
                             runner++;
@@ -190,14 +186,14 @@ $(document).ready(function() {
                 html2 = $("<div class='form-group'>" +
                     "<label class='col-sm-2 control-label'>Studio type :</label>" +
                     "<div class='checkbox col-sm-2' style='margin-right: 0'>" +
-                    "<label> <input type='checkbox'checked='true'> With lighting Prophoto</label> </div> " +
+                    "<label> <input type='checkbox'checked='true' disabled> With lighting Prophoto</label> </div> " +
                     "<div class='checkbox col-sm-2'> " +
                     "<label> " +
-                    "<input type='checkbox'> With lighting Broncolor</label> " +
+                    "<input type='checkbox' disabled> With lighting Broncolor</label> " +
                     "</div> " +
                     "<div class='checkbox col-sm-2'> " +
                     "<label> " +
-                    "<input type='checkbox'> No lighting </label> " +
+                    "<input type='checkbox' disabled> No lighting </label> " +
                     "</div> " +
                     "</div>" +
                     "<div><ul class='nav nav-tabs' role='tablist'> " +
@@ -215,13 +211,11 @@ $(document).ready(function() {
                 } else {
                     html = $("<div class='form-group'>" +
                         "<label class='col-sm-2 control-label'>Studio type :</label>" +
-                        "<div class='checkbox col-sm-2' style='margin-right: -50px;'>" +
-                        "<label> <input type='checkbox'> With lighting Prophoto</label> </div> " +
+                        "<div class='checkbox col-sm-2' style='margin-right: -100px;'>" +
+                        "<label> <input type='checkbox'> With Mac</label> </div> " +
                         "<div class='checkbox col-sm-2'> " +
                         "<label> " +
-                        "<input type='checkbox'> With lighting BronColor</label> " +
-                        "<label> " +
-                        "<input type='checkbox'> No lighting </label> " +
+                        "<input type='checkbox'> Without Mac</label> " +
                         "</div> " +
                         "</div>");
                     html.appendTo(ac);
@@ -252,7 +246,7 @@ $(document).ready(function() {
 
 
     });
-     $('#assignment_selector').on('change', function() {
+    $('#assignment_selector').on('change', function() {
         var selected = $('#assignment_selector').val();
         if (selected == "Studio rental" || selected == "Studio rental + Location") {
             var dummy = $("<div class='form-group'><label class='col-sm-2 control-label'>Studio room :</label>" +
