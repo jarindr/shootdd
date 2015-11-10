@@ -124,13 +124,6 @@
 						</select>
 					</div>
 				</div>
-				<div class="form-group">
-					<label class="col-sm-2 control-label">Assistant :</label>
-					<div class="col-sm-5">
-						<input type="text" class="form-control" id="assistant_form1" name='assistant_form1'
-						placeholder="Assistant name ..." value="<%-selected[0].assistance %>" disabled>
-					</div>
-				</div>
 				<div id="assistant-group-form">
 				</div>
 				<div id="detail-form">
@@ -158,19 +151,40 @@
 		<script src="../javascripts/navigation.js"></script>
 		<script type="text/javascript">
 					var assignment_selector = <%- JSON.stringify(selected) %> ;
+					var ass = <%- JSON.stringify(ass) %> ;
 					$(document).ready(function() {
 						if (assignment_selector[0].assignment == "Production") {
 							if (assignment_selector[0].room_name != "Onscreen room") {
 								var dummy = $("<div class='form-group'><label class='col-sm-2 control-label'>Onscreen room :</label>" +
 									"<div class='col-sm-5'>" +
 									"<select class='form-control' id='room_selectorx' name='room_selectorx' disabled>" +
-									"<option value='ro01'>Onscreen room</option><option>None</option>" +
+									"<option value='ro01'>Onscreen room</option>" +
+									"<option>None</option>" +
 									"</select>" +
 									"</div>" +
 									"</div>"
 								);
 								dummy.prependTo($('#room-group-form'));
 							}
+						}
+						for (var i = 0; i < ass.length; i++) {
+							if (i == 0) {
+								var html = $("<div class='form-group'><label class='col-sm-2 control-label'>Assistant :</label><div class='col-sm-5'> " +
+									"<input type='text' value=" + "'" + ass[i].assistance + "'" + "class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...' disabled> " +
+									"</div></div>");
+							} else {
+								var html = $("<div class='form-group'><div class='col-sm-2'></div><div class='col-sm-5'> " +
+									"<input type='text' value=" + "'" + ass[i].assistance + "'" + "class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...' disabled> " +
+									"</div></div>");
+							}
+							html.appendTo("#assistant-group-form");
+
+						}
+						if (ass.length == 0) {
+							var html = $("<div class='form-group'><label class='col-sm-2 control-label'>Assistant :</label><div class='col-sm-5'> " +
+								"<input type='text' class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...' disabled> " +
+								"</div></div>");
+							html.appendTo("#assistant-group-form");
 						}
 						for (var i = 0; i < assignment_selector.length - 1; i++) {
 							$("#add_room").click();
@@ -190,6 +204,13 @@
 								});
 							}
 						}
+						$("#room_selectorx").find("option").each(function() {
+							if (assignment_selector[0].room_name != "Onscreen room") {
+								if ($(this).text() == "None") {
+									$(this).attr("selected", "");
+								}
+							}
+						});
 						$("#assignment_selector").find("option").each(function() { // change the selected of assignment
 							if (assignment_selector[0].assignment == $(this).text()) {
 								$(this).attr("selected", "");
@@ -216,6 +237,6 @@
 							$('#room_selector').parent().parent().find(".col-sm-1").find("#add_room").hide();
 						}
 					});
-	</script>
-</body>
+		</script>
+	</body>
 </html>

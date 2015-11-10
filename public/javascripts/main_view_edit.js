@@ -68,14 +68,10 @@ $(document).ready(function() {
 
     $("#add_assistant").click(function() { // set adding assistance
         var html = $("<div class='form-group'><div class='col-sm-2'></div><div class='col-sm-5'> " +
-            "<input type='text' class='form-control' id='assistant_form" + counter + "'" + "name='assistant_form" + counter + "'" +
-            " placeholder = 'Assistant name ...' > " +
-            "</div>" + "<div class='col-sm-1'>" +
-            "<button type='button' class='btn btn-default' id='delete_room'>-</button>" +
-            "</div>" + "</div>");
+            "<input type='text' class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...' disabled> " +
+            "</div></div>");
         html.appendTo("#assistant-group-form");
         html.hide().show('fast');
-        counter++;
     });
     $("#room-group-form").on('click', '#add_room', function() { //set adding room
         var html = $("<div class='form-group'><label class='col-sm-2 control-label'></label>" +
@@ -207,18 +203,35 @@ $(document).ready(function() {
                     "</div> " +
                     "</div>");
                 if ($('#assignment_selector').val() != 'Onscreen room') {
-                    html2.appendTo(ac);
+                    if ($('#assignment_selector').val() == 'Equipment rental') {
+                        var htmlx = $("<div><ul class='nav nav-tabs' role='tablist'> " +
+                            "<li role='presentation' class='active'><a href='#home' aria-controls='home' role='tab' data-toggle='tab'>Equipment list</a></li> " +
+                            "<li role='presentation'><a href='#profile' aria-controls='profile' role='tab' data-toggle='tab'>Rent Equipment</a></li> " +
+                            "</ul> " +
+                            "<div class='tab-content'> " +
+                            "<div role='tabpanel' class='tab-pane fade in active' id='home' style='margin-bottom: 2%;'>" +
+                            codes + "</div> " +
+                            "<div role='tabpanel' class='tab-pane fade' id='profile'>" + rent_code + "</div> " +
+                            "</div> " +
+                            "</div>");
+                        htmlx.appendTo(ac);
+                    } else {
+                        html2.appendTo(ac);
+                    }
                 } else {
-                    html = $("<div class='form-group'>" +
-                        "<label class='col-sm-2 control-label'>Studio type :</label>" +
-                        "<div class='checkbox col-sm-2' style='margin-right: -100px;'>" +
-                        "<label> <input type='checkbox'> With Mac</label> </div> " +
-                        "<div class='checkbox col-sm-2'> " +
-                        "<label> " +
-                        "<input type='checkbox'> Without Mac</label> " +
-                        "</div> " +
-                        "</div>");
-                    html.appendTo(ac);
+                    if ($('#assignment_selector').val() != 'Equipment rental') {
+                        html = $("<div class='form-group'>" +
+                            "<label class='col-sm-2 control-label'>Studio type :</label>" +
+                            "<div class='checkbox col-sm-2' style='margin-right: -100px;'>" +
+                            "<label> <input type='checkbox' disabled> With Mac</label> </div> " +
+                            "<div class='checkbox col-sm-2'> " +
+                            "<label> " +
+                            "<input type='checkbox' disabled> Without Mac</label> " +
+                            "</div> " +
+                            "</div>");
+                        html.appendTo(ac);
+                    }
+
                 }
                 firstTime = false;
             }

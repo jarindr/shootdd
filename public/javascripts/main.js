@@ -46,20 +46,18 @@ $(document).ready(function() {
 
     $("#add_assistant").click(function() { // set adding assistance
         var html = $("<div class='form-group'><div class='col-sm-2'></div><div class='col-sm-5'> " +
-            "<input type='text' class='form-control' id='assistant_form" + counter + "'" + "name='assistant_form" + counter + "'" +
-            " placeholder = 'Assistant name ...' > " +
+            "<input type='text' class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...' > " +
             "</div>" + "<div class='col-sm-1'>" +
-            "<button type='button' class='btn btn-default' id='delete_room'>-</button>" +
+            "<button type='button' class='btn btn-default' id='delete_assistant'>-</button>" +
             "</div>" + "</div>");
         html.appendTo("#assistant-group-form");
         html.hide().show('fast');
-        counter++;
     });
 
     $("#room-group-form").on('click', '#add_room', function() { //set adding room
         var html = $("<div class='form-group'><label class='col-sm-2 control-label'></label>" +
             "<div class='col-sm-5'>" +
-            "<select class='form-control' id='room_selector" + room_counter + "'" + "name='room_selector" + room_counter + "'>" +
+            "<select class='form-control ads' id='room_selector" + room_counter + "'" + "name='room_selector" + room_counter + "'>" +
             "<option value='rs01'>Studio room S</option>" +
             "<option value='rs02'>Studio room M</option>" +
             "<option value='rs03'>Studio room L</option>" +
@@ -71,15 +69,36 @@ $(document).ready(function() {
             "<button type='button' class='btn btn-default' id='delete_room'>-</button>" +
             "</div>" +
             "</div>");
+        var selected = [];
         html.appendTo("#room-group-form");
+        $("#room-group-form").find('.form-group').each(function(index, el) {
+            $(el).find('option').each(function(index, els) {
+                if (els.selected == true) {
+                    selected.push($(els).val());
+                }
+            });
+
+        });
+        html.find('option').each(function(index, el) {
+            if ($.inArray($(el).val(), selected) == -1) {
+                el.selected = true;
+                return false;
+            }
+        });
+        reCheckRoomOption()
         html.hide().show('fast');
         room_counter++;
     });
-    $("#room-group-form").on("click", "#delete_room", function() { // set binding event to room-group-form delete out 
-        $(this).parent().parent().hide('fast');
+    $(document).on('change', '.ads', function(event) {
+        reCheckRoomOption();
     });
-    $("#assistant-group-form").on("click", "#delete_room", function() { // set binding event to room-group-form delete out 
-        $(this).parent().parent().hide('fast');
+    $("#room-group-form").on("click", "#delete_room", function() { // set binding event to room-group-form delete out 
+        $(this).parent().parent().hide('fast').empty();
+        reCheckRoomOption();
+    });
+    $("#assistant-group-form").on("click", "#delete_assistant", function() { // set binding event to room-group-form delete out 
+        $(this).parent().parent().hide('fast').empty();
+
     });
     $("#submit").click(function(event) { // equipment input for sending to route
         var form_html = "";
@@ -93,7 +112,6 @@ $(document).ready(function() {
     });
     $("#add_detail").click(function() { // add detail toggle
         active = !active;
-        moreDetailClick = true;
         if (active) {
             $(this).text("Hide detail");
             if (firstTime) {
@@ -262,7 +280,11 @@ $(document).ready(function() {
                 "</div>" +
                 "</div>"
             );
+            $(".panel-group").find(".form-group").hide();
             dummy.appendTo($('#room-group-form').empty()).hide().show('slow');
+
+        } else {
+            $(".panel-group").find(".form-group").show();
         }
         if (selected == "Onscreen room") {
             var dummy = $("<div class='form-group'><label class='col-sm-2 control-label'>Onscreen room :</label>" +
@@ -284,9 +306,10 @@ $(document).ready(function() {
                 "</div> " +
                 "</div>");
             html.appendTo($(".panel-group").find(".form-group").empty());
+            $(".nav-tabs").hide();
+            $(".tab-content").hide();
         } else {
-            html = $("<div class='form-group'>" +
-                "<label class='col-sm-2 control-label'>Studio type :</label>" +
+            html = $("<label class='col-sm-2 control-label'>Studio type :</label>" +
                 "<div class='checkbox col-sm-2' style='margin-right: 0'>" +
                 "<label> <input type='checkbox'checked='true'> With lighting Prophoto</label> </div> " +
                 "<div class='checkbox col-sm-2'> " +
@@ -296,9 +319,10 @@ $(document).ready(function() {
                 "<div class='checkbox col-sm-2'> " +
                 "<label> " +
                 "<input type='checkbox'> No lighting </label> " +
-                "</div> " +
                 "</div>");
             html.appendTo($(".panel-group").find(".form-group").empty());
+            $(".nav-tabs").show();
+            $(".tab-content").show();
         }
 
     });
@@ -307,5 +331,28 @@ $(document).ready(function() {
         $('input[type="checkbox"]').not(this).prop('checked', false);
     });
 
+    function reCheckRoomOption() {
+        var selected = [];
+        var new_selected = [];
+        $("#room-group-form").find('.form-group').each(function(index, el) {
+            $(el).find('option').each(function(index, els) {
+                if (els.selected == true) {
+                    new_selected.push($(els).val());
+                }
+            });
+        });
+        console.log(new_selected);
+        $("#room-group-form").find('.form-control').each(function(index, el) {
+            $(el).find('option').each(function(index, els) {
+                if ($.inArray($(els).val(), new_selected) != -1) {
+                    if ($(el).val() != $(els).val()) {
+                        $(els).css('display', 'none');
+                    }
+                } else {
+                    $(els).css('display', 'block');
+                }
+            });
+        });
+    }
 
 });

@@ -171,9 +171,9 @@ $(document).ready(function() {
                             "<ul class='list-group'> ";
                         for (var x = 0; x < equipArray[nType].length; x++) {
                             if (count[nType][x] != 0) {
-                                codes += "<li class='list-group-item'>" + equipArray[nType][x];
+                                codes += "<li class='list-group-item'><b>" + equipArray[nType][x] + " (" + count[nType][x] + ")" + "</b>";
                                 for (var c = 0; c < count[nType][x]; c++) {
-                                    codes += "<select class='form-control'>";
+                                    codes += "<select class='form-control' style='margin-top:5px;'>";
                                     for (var k = 0; k < description[equipArray[nType][x]].length; k++) {
                                         codes += "<option>" + description[equipArray[nType][x]][k] + "</option>";
                                     }
@@ -196,14 +196,14 @@ $(document).ready(function() {
                 html2 = $("<div class='form-group'>" +
                     "<label class='col-sm-2 control-label'>Studio type :</label>" +
                     "<div class='checkbox col-sm-2' style='margin-right: 0'>" +
-                    "<label> <input type='checkbox'checked='true'> With lighting Prophoto</label> </div> " +
+                    "<label> <input type='checkbox'checked='true' disabled> With lighting Prophoto</label> </div> " +
                     "<div class='checkbox col-sm-2'> " +
                     "<label> " +
-                    "<input type='checkbox'> With lighting Broncolor</label> " +
+                    "<input type='checkbox' disabled> With lighting Broncolor</label> " +
                     "</div> " +
                     "<div class='checkbox col-sm-2'> " +
                     "<label> " +
-                    "<input type='checkbox'> No lighting </label> " +
+                    "<input type='checkbox' disabled> No lighting </label> " +
                     "</div> " +
                     "</div>" +
                     "<div><ul class='nav nav-tabs' role='tablist'> " +
@@ -217,20 +217,35 @@ $(document).ready(function() {
                     "</div> " +
                     "</div>");
                 if ($('#assignment_selector').val() != 'Onscreen room') {
-                    html2.appendTo(ac);
+                    if ($('#assignment_selector').val() == 'Equipment rental') {
+                        var htmlx = $("<div><ul class='nav nav-tabs' role='tablist'> " +
+                            "<li role='presentation' class='active'><a href='#home' aria-controls='home' role='tab' data-toggle='tab'>Equipment list</a></li> " +
+                            "<li role='presentation'><a href='#profile' aria-controls='profile' role='tab' data-toggle='tab'>Rent Equipment</a></li> " +
+                            "</ul> " +
+                            "<div class='tab-content'> " +
+                            "<div role='tabpanel' class='tab-pane fade in active' id='home' style='margin-bottom: 2%;'>" +
+                            codes + "</div> " +
+                            "<div role='tabpanel' class='tab-pane fade' id='profile'>" + rent_code + "</div> " +
+                            "</div> " +
+                            "</div>");
+                        htmlx.appendTo(ac);
+                    } else {
+                        html2.appendTo(ac);
+                    }
                 } else {
-                    html = $("<div class='form-group'>" +
-                        "<label class='col-sm-2 control-label'>Studio type :</label>" +
-                        "<div class='checkbox col-sm-2' style='margin-right: -50px;'>" +
-                        "<label> <input type='checkbox'> With lighting Prophoto</label> </div> " +
-                        "<div class='checkbox col-sm-2'> " +
-                        "<label> " +
-                        "<input type='checkbox'> With lighting BronColor</label> " +
-                        "<label> " +
-                        "<input type='checkbox'> No lighting </label> " +
-                        "</div> " +
-                        "</div>");
-                    html.appendTo(ac);
+                    if ($('#assignment_selector').val() != 'Equipment rental') {
+                        html = $("<div class='form-group'>" +
+                            "<label class='col-sm-2 control-label'>Studio type :</label>" +
+                            "<div class='checkbox col-sm-2' style='margin-right: -100px;'>" +
+                            "<label> <input type='checkbox' disabled> With Mac</label> </div> " +
+                            "<div class='checkbox col-sm-2'> " +
+                            "<label> " +
+                            "<input type='checkbox' disabled> Without Mac</label> " +
+                            "</div> " +
+                            "</div>");
+                        html.appendTo(ac);
+                    }
+
                 }
                 firstTime = false;
             }
@@ -324,7 +339,10 @@ $(document).ready(function() {
                 "</div>" +
                 "</div>"
             );
+            
             dummy.appendTo($('#room-group-form').empty()).hide().show('slow');
+        } else {
+            $(".nav-tabs").show();
         }
 
     });

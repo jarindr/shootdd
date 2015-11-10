@@ -23,10 +23,10 @@ opacity:0.5;
         <td><%= data[i].time_start.toString().slice(0,5); %></td>
         <td><%- data[i].Job_description.replace(/\r?\n/g,'<br />'); %></td>
         <td><b style="color:orange;"><%= data[i].status %></b></td>
-        <td><%= data[i].assignment %></td>
+        <td><%- data[i].assignment %></td>
         <td><%- data[i].room_name %></td>
-        <td><%= data[i].photographer %></td>
-        <td><%= data[i].assistance %></td>
+        <td><%- data[i].photographer %></td>
+        <td><%- data[i].assistance %></td>
     </tr>
     <% } %>
 </table>

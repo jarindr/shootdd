@@ -72,24 +72,22 @@ router.get('/close_job', function(req, res, next) {
         "booking.photographer," +
         "DATE_FORMAT(shooting_date_start,'%d-%m-%Y %a') shooting_date_start," +
         "DATE_FORMAT(shooting_date_end,'%a %d-%m-%Y') shooting_date_end," +
-        "booking.time_start,booking.time_end,booking.status,booking.assignment,assistance.assistance,room.room_name" +
-        " FROM (booking LEFT JOIN assistance " +
-        "ON booking.QID=assistance.QID)" +
-        " LEFT JOIN (booking_use_room INNER JOIN room ON booking_use_room.RID=room.RID)" +
+        "booking.time_start,booking.time_end,booking.status,booking.assignment,room.room_name" +
+        " FROM booking LEFT JOIN (booking_use_room INNER JOIN room ON booking_use_room.RID=room.RID)" +
         "ON booking_use_room.QID=booking.QID " +
         "WHERE booking.QID=" + "'" + QID + "'" +
         " ORDER BY booking.shooting_date_start";
-    var query_equip = "SELECT name_equipment,amount FROM booking_use_n_equip WHERE booking_use_n_equip.QID=" + "'" + QID + "'";
+    var query_ass = "SELECT assistance.assistance FROM assistance WHERE assistance.QID=" + "'" + QID + "'";
     connection.query(query, function(err, row, fields) {
         if (err) {
             console.log("can't select choosen queue with error " + err);
         } else {
-            console.log(row);
-            res.render('close_job', {
-                selected: row
+            connection.query(query_ass, function(err, ass, fields) {
+                res.render('close_job', {
+                    selected: row,
+                    ass: ass
+                });
             });
-
-
         }
 
     });
@@ -111,25 +109,22 @@ router.get('/view_edit', function(req, res, next) {
         "booking.photographer," +
         "DATE_FORMAT(shooting_date_start,'%d-%m-%Y %a') shooting_date_start," +
         "DATE_FORMAT(shooting_date_end,'%a %d-%m-%Y') shooting_date_end," +
-        "booking.time_start,booking.time_end,booking.status,booking.assignment,assistance.assistance,room.room_name" +
-        " FROM (booking LEFT JOIN assistance " +
-        "ON booking.QID=assistance.QID)" +
-        " LEFT JOIN (booking_use_room INNER JOIN room ON booking_use_room.RID=room.RID)" +
+        "booking.time_start,booking.time_end,booking.status,booking.assignment,room.room_name" +
+        " FROM booking LEFT JOIN (booking_use_room INNER JOIN room ON booking_use_room.RID=room.RID)" +
         "ON booking_use_room.QID=booking.QID " +
         "WHERE booking.QID=" + "'" + QID + "'" +
         " ORDER BY booking.shooting_date_start";
-    var query_equip = "SELECT name_equipment,amount FROM booking_use_n_equip WHERE booking_use_n_equip.QID=" + "'" + QID + "'";
+    var query_ass = "SELECT assistance.assistance FROM assistance WHERE assistance.QID=" + "'" + QID + "'";
     connection.query(query, function(err, row, fields) {
         if (err) {
             console.log("can't select choosen queue with error " + err);
         } else {
-
-            console.log(row);
-            res.render('view_edit', {
-                selected: row
+            connection.query(query_ass, function(err, ass, fields) {
+                res.render('view_edit', {
+                    selected: row,
+                    ass: ass
+                });
             });
-
-
         }
 
     });
@@ -143,7 +138,6 @@ router.post('/view_edit', function(req, res, next) {
 router.get('/view', function(req, res, next) {
     var QID = req.session.QID;
     router.get('/dump_equipment_qid', function(req, res, next) {
-
         var QID_dump = req.session.QID;
         var query = "SELECT name_equipment,amount FROM booking_use_n_equip WHERE booking_use_n_equip.QID=" + "'" + QID_dump + "'";
         connection.query(query, function(err, rows, fields) {
@@ -156,23 +150,22 @@ router.get('/view', function(req, res, next) {
         "booking.photographer," +
         "DATE_FORMAT(shooting_date_start,'%d-%m-%Y %a') shooting_date_start," +
         "DATE_FORMAT(shooting_date_end,'%a %d-%m-%Y') shooting_date_end," +
-        "booking.time_start,booking.time_end,booking.status,booking.assignment,assistance.assistance,room.room_name" +
-        " FROM (booking LEFT JOIN assistance " +
-        "ON booking.QID=assistance.QID)" +
-        " LEFT JOIN (booking_use_room INNER JOIN room ON booking_use_room.RID=room.RID)" +
+        "booking.time_start,booking.time_end,booking.status,booking.assignment,room.room_name" +
+        " FROM booking LEFT JOIN (booking_use_room INNER JOIN room ON booking_use_room.RID=room.RID)" +
         "ON booking_use_room.QID=booking.QID " +
         "WHERE booking.QID=" + "'" + QID + "'" +
         " ORDER BY booking.shooting_date_start";
+    var query_ass = "SELECT assistance.assistance FROM assistance WHERE assistance.QID=" + "'" + QID + "'";
     connection.query(query, function(err, row, fields) {
         if (err) {
             console.log("can't select choosen queue with error " + err);
         } else {
-
-            res.render('view', {
-                selected: row
+            connection.query(query_ass, function(err, ass, fields) {
+                res.render('view', {
+                    selected: row,
+                    ass: ass
+                });
             });
-
-
         }
 
     });
@@ -234,13 +227,12 @@ router.get('/queue_table', function(req, res, next) {
         "booking.photographer," +
         "DATE_FORMAT(shooting_date_start,'%a %d-%m-%Y') shooting_date_start," +
         "DATE_FORMAT(shooting_date_end,'%a %d-%m-%Y') shooting_date_end," +
-        "booking.time_start,booking.time_end,booking.status,booking.assignment,assistance.assistance,room.room_name" +
-        " FROM (booking LEFT JOIN assistance " +
-        "ON booking.QID=assistance.QID)" +
-        " LEFT JOIN (booking_use_room INNER JOIN room ON booking_use_room.RID=room.RID)" +
+        "booking.time_start,booking.time_end,booking.status,booking.assignment,room.room_name,booking.status AS assistance" +
+        " FROM booking LEFT JOIN (booking_use_room INNER JOIN room ON booking_use_room.RID=room.RID)" +
         "ON booking_use_room.QID=booking.QID " +
         "WHERE YEARWEEK(booking.shooting_date_start, 1) = YEARWEEK(CURDATE()+INTERVAL " + sort_type + " WEEK, 1) " +
-        "ORDER BY booking.shooting_date_start"
+        "ORDER BY booking.shooting_date_start";
+    query_ass = "SELECT* FROM assistance";
     connection.query(query, function(err, rows, fields) {
         var rl = rows.length;
         if (err) {
@@ -265,45 +257,58 @@ router.get('/queue_table', function(req, res, next) {
             }
 
         }
-        rl = rows.length;
-        var datea = new Date();
-        var dateArray = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-        var notHave = [];
-        var found = false;
-        for (var j = 0; j < dateArray.length; j++) {
-            for (var i = 0; i < rl; i++) {
-                var day = rows[i].shooting_date_start.split('-');
-                var realDay = day[0].slice(0, 3);
-                if (dateArray[j] == realDay) {
-                    found = true;
-                    break;
-                } else {
-                    found = false;
+
+        connection.query(query_ass, function(err, rowsa, field) {
+            for (var i = 0; i < rows.length; i++) {
+                rows[i].assistance = "";
+                for (var j = 0; j < rowsa.length; j++) {
+                    if (rows[i].QID == rowsa[j].QID) {
+                        rows[i].assistance = rows[i].assistance + rowsa[j].assistance + "<br>";
+                    }
+
                 }
             }
-            if (!found) {
-                var date_start = dateArray[j];
-                var json = {
-                    QID: '',
-                    client: '',
-                    Job_description: '',
-                    photographer: '',
-                    shooting_date_start: date_start,
-                    shooting_date_end: '',
-                    time_start: '',
-                    time_end: '',
-                    status: '',
-                    assignment: '',
-                    assistance: '',
-                    room_name: ''
-                };
-                rows.push(json);
-            }
+            rl = rows.length;
+            var datea = new Date();
+            var dateArray = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            var notHave = [];
+            var found = false;
+            for (var j = 0; j < dateArray.length; j++) {
+                for (var i = 0; i < rl; i++) {
+                    var day = rows[i].shooting_date_start.split('-');
+                    var realDay = day[0].slice(0, 3);
+                    if (dateArray[j] == realDay) {
+                        found = true;
+                        break;
+                    } else {
+                        found = false;
+                    }
+                }
+                if (!found) {
+                    var date_start = dateArray[j];
+                    var json = {
+                        QID: '',
+                        client: '',
+                        Job_description: '',
+                        photographer: '',
+                        shooting_date_start: date_start,
+                        shooting_date_end: '',
+                        time_start: '',
+                        time_end: '',
+                        status: '',
+                        assignment: '',
+                        assistance: '',
+                        room_name: ''
+                    };
+                    rows.push(json);
+                }
 
-        }
-        res.render('queue_table', {
-            data: rows
+            }
+            res.render('queue_table', {
+                data: rows
+            });
         });
+
     });
 
 });
@@ -370,17 +375,13 @@ router.post('/confirm_create_queue', function(req, res, next) {
         if (err) {
             res.redirect('error');
         }
-        var ast = {
-            assistance: req.body.assistant_form1,
-            QID: id,
-            type: "shootdee"
-        }
         var nRoom = 0;
         var nAss = 0;
         var roomArray = [];
         var equipArray = [];
         var arrayNumberEquip = [];
         var equipData = [];
+        var assData = [];
         for (var key in req.body) {
             if (req.body.hasOwnProperty(key)) {
                 if (key == "equip_item") {
@@ -393,12 +394,21 @@ router.post('/confirm_create_queue', function(req, res, next) {
                 }
                 if (key.slice(0, 4) == "room") {
                     if (req.body[key] != "None") {
-                        nRoom++;
                         roomArray.push([id, req.body[key], 'hello']);
                     }
                 }
-                if (key.slice(0, 9) == "assistant") {
-                    nAss++;
+                if (key == "assistant_form") {
+                    var assistString = req.body[key];
+                    if (typeof assistString == "string") {
+                        assData.push([id, req.body[key], "shootdee"]);
+                    } else {
+                        for (var i = 0; i < assistString.length; i++) {
+                            if (req.body[key][i].trim().length > 0) {
+                                assData.push([id, req.body[key][i], "shootdee"]);
+                            }
+                        }
+                    }
+
                 }
             }
         }
@@ -407,7 +417,7 @@ router.post('/confirm_create_queue', function(req, res, next) {
                 console.log("can't insert booking with error code " + err);
             } else {
                 console.log("insert booking complete");
-                connection.query('INSERT INTO assistance SET?', ast, function(err, row, field) {
+                connection.query('INSERT INTO assistance(QID,assistance,type) VALUE?', [assData], function(err, row, field) {
                     if (err) {
                         console.log("can't insert assistant with error code " + err);
                     } else {

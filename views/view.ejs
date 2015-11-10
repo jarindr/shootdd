@@ -119,16 +119,6 @@
 							</select>
 						</div>
 					</div>
-					<div class="form-group">
-						<label class="col-sm-2 control-label">Assistant :</label>
-						<div class="col-sm-5">
-							<input type="text" class="form-control" id="assistant_form1" name='assistant_form1'
-							placeholder="Assistant name ..." value='<%-selected[0].assistance %>'>
-						</div>
-						<div class="col-sm-1">
-							<button type="button" class="btn btn-default" id="add_assistant">+</button>
-						</div>
-					</div>
 					<div id="assistant-group-form">
 					</div>
 					<div id="detail-form">
@@ -158,10 +148,21 @@
 			<script src="../javascripts/date_control.js"></script>
 			<script src="../javascripts/navigation.js"></script>
 			<script type="text/javascript">
-			var assignment_selector = <%- JSON.stringify(selected) %> ;
+			var assignment_selector = <%-JSON.stringify(selected) %> ;
+			var ass = <%- JSON.stringify(ass) %> ;
 			$(document).ready(function() {
 				if (assignment_selector[0].assignment == "Production") {
 					if (assignment_selector[0].room_name != "Onscreen room") {
+						var dummy = $("<div class='form-group'><label class='col-sm-2 control-label'>Onscreen room :</label>" +
+							"<div class='col-sm-5'>" +
+							"<select class='form-control' id='room_selectorx' name='room_selectorx'>" +
+							"<option>None</option><option value='ro01'>Onscreen room</option>" +
+							"</select>" +
+							"</div>" +
+							"</div>"
+						);
+
+					} else {
 						var dummy = $("<div class='form-group'><label class='col-sm-2 control-label'>Onscreen room :</label>" +
 							"<div class='col-sm-5'>" +
 							"<select class='form-control' id='room_selectorx' name='room_selectorx'>" +
@@ -170,24 +171,77 @@
 							"</div>" +
 							"</div>"
 						);
-						dummy.prependTo($('#room-group-form'));
+					}
+					dummy.prependTo($('#room-group-form'));
+				}
+				for (var i = 0; i < ass.length; i++) {
+					if (i == 0) {
+						var html = $("<div class='form-group'>" +
+							"<label class='col-sm-2 control-label'>Assistant :</label>" +
+							"<div class='col-sm-5'> " +
+							"<input type='text' value=" + "'" + ass[i].assistance + "'" + "class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...'> " +
+							"</div>" +
+							"<div class='col-sm-1'>" +
+							"<button type='button' class='btn btn-default' id='add_assistant'>+</button>" +
+							"</div>" +
+							"</div>");
+					} else {
+						var html = $("<div class='form-group'><div class='col-sm-2'></div><div class='col-sm-5'> " +
+							"<input type='text' value=" + "'" + ass[i].assistance + "'" + "class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...'> " +
+							"</div>"+
+							"<div class='col-sm-1'>" +
+							"<button type='button' class='btn btn-default' id='delete_assistant'>-</button>" +
+							"</div>" +
+							"</div>");
+					}
+					html.appendTo("#assistant-group-form");
+
+				}
+				if (ass.length == 0) {
+					var html = $("<div class='form-group'><label class='col-sm-2 control-label'>Assistant :</label><div class='col-sm-5'> " +
+						"<input type='text' class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...'> " +
+						"</div><div class='col-sm-1'>" +
+							"<button type='button' class='btn btn-default' id='add_assistant'>+</button>" +
+							"</div></div>");
+					html.appendTo("#assistant-group-form");
+				}
+				if (assignment_selector[0].room_name != "Onscreen room") {
+					for (var i = 0; i < assignment_selector.length - 1; i++) {
+						$("#add_room").click();
+					}
+				} else {
+					for (var i = 0; i < assignment_selector.length - 2; i++) {
+						$("#add_room").click();
 					}
 				}
-				for (var i = 0; i < assignment_selector.length - 1; i++) {
-					$("#add_room").click();
-				}
+				var test = false;
 				for (var i = 0; i < assignment_selector.length; i++) {
 					if (i == 0) {
 						$("#room_selector").find("option").each(function() {
-							if (assignment_selector[i].room_name == $(this).text()) {
-								$(this).attr("selected", "");
+							if (assignment_selector[0].room_name != "Onscreen room") {
+								if (assignment_selector[i].room_name == $(this).text()) {
+									$(this).attr("selected", "");
+								}
+							} else {
+								if (assignment_selector[i + 1].room_name == $(this).text()) {
+									$(this).attr("selected", "");
+									test = true;
+								}
 							}
+
 						});
 					} else {
 						$("#room_selector" + i).find("option").each(function() {
-							if (assignment_selector[i].room_name == $(this).text()) {
-								$(this).attr("selected", "");
+							if (test) {
+								if (assignment_selector[i + 1].room_name == $(this).text()) {
+									$(this).attr("selected", "");
+								}
+							} else {
+								if (assignment_selector[i].room_name == $(this).text()) {
+									$(this).attr("selected", "");
+								}
 							}
+
 						});
 					}
 				}
@@ -198,6 +252,13 @@
 				});
 				if (assignment_selector[0].assignment == "Equipment rental") {
 					$('#room_selector').empty().append("<option>None</option>");
+					$("#add_room").css({
+						"display": "none"
+					});
+				} else {
+					$("#add_room").css({
+						"display": "block"
+					});
 				}
 				$("#status_selector").find("option").each(function() {
 					if (assignment_selector[0].status == $(this).text()) {
@@ -212,10 +273,7 @@
 						$(this).attr("selected", "");
 					}
 				});
-				if (assignment_selector[0].room_name == "Onscreen room") {
-					$('#room_selector').empty().append("<option value='ro01'>Onscreen room</option><option>None</option>");
-					$('#room_selector').parent().parent().find(".col-sm-1").find("#add_room").hide();
-				}
+
 			});
 		</script>
 	</body>
