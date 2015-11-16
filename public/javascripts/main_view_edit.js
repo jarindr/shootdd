@@ -14,8 +14,8 @@ var firstTime = true; //more detail clicked first time?
 var moreDetailClick = false; // check weather the more detail clicked yet
 var click = false;
 var equip_amount = [];
-var runner = 0;
 var auto_add_detail = true; // set value of auto add detail button click
+var type;
 $(document).ready(function() {
     setMenuClicked();
     $(".btn").mouseup(function() {
@@ -58,9 +58,14 @@ $(document).ready(function() {
                 }
                 k = 0;
             }
-            if (auto_add_detail) {
-                $("#add_detail").click();
-            }
+
+            $.getJSON('http://localhost:3000/dump_qid_status', function(statusa) {
+                type = statusa[0].type;
+                console.log(type);
+                if (auto_add_detail) {
+                    $("#add_detail").click();
+                }
+            });
 
         });
 
@@ -166,8 +171,6 @@ $(document).ready(function() {
                                 codes += "<li class='list-group-item'>" + equipArray[nType][x] +
                                     "<input type='text' class='value_equip' value=" + "'" + count[nType][x] + "' disabled> ";
                             }
-
-                            runner++;
                         }
                         codes += "</ul></div></div>";
                         nType++;
@@ -182,7 +185,7 @@ $(document).ready(function() {
                 html2 = $("<div class='form-group'>" +
                     "<label class='col-sm-2 control-label'>Studio type :</label>" +
                     "<div class='checkbox col-sm-2' style='margin-right: 0'>" +
-                    "<label> <input type='checkbox'checked='true' disabled> With lighting Prophoto</label> </div> " +
+                    "<label> <input type='checkbox' disabled> With lighting Prophoto</label> </div> " +
                     "<div class='checkbox col-sm-2'> " +
                     "<label> " +
                     "<input type='checkbox' disabled> With lighting Broncolor</label> " +
@@ -240,6 +243,11 @@ $(document).ready(function() {
             ac.hide('fast');
             $(this).text("More detail");
         }
+        $('input[type="checkbox"]').each(function(index, el) {
+            if ($(el).parent().text().trim() == type) {
+                el.checked = true;
+            }
+        });
     });
     $(document).on("click", "#button", function() { // accordion for binding event click on + - button update value
         var $button = $(this);
@@ -332,6 +340,7 @@ $(document).ready(function() {
         $(this).prop('checked', true);
         $('input[type="checkbox"]').not(this).prop('checked', false);
     });
+
 
     function setMenuClicked() { //function for menu on state
         var curentFile = window.location.pathname.split("/").pop();

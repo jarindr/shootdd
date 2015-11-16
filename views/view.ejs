@@ -16,265 +16,320 @@
 		</style>
 		<% include nav.ejs %>
 		<div class="container">
-			<div class="form-group">
-				<div class="col-sm-12" style="margin-bottom:30px;-webkit-box-shadow: 0px 1px 0px 0px rgba(173,173,173,1);
-					-moz-box-shadow: 0px 1px 0px 0px rgba(173,173,173,1);
-					box-shadow: 0px 1px 0px 0px rgba(173,173,173,1);"><label><b style="font-size:25px;">Edit Queue <%- selected[0].QID %></b></label></div>
-				</div>
-				<form class="form-horizontal" action="created_main_post" method="post">
-					<div id="tester"></div>
-					<input style="display:none;" type="text" name="somefakename"/>
-					<input style="display:none;" type="password" name="anotherfakename"/>
+			<div class="col-sm-12" style="margin-bottom:30px;-webkit-box-shadow: 0px 1px 0px 0px rgba(173,173,173,1);
+				-moz-box-shadow: 0px 1px 0px 0px rgba(173,173,173,1);
+				box-shadow: 0px 1px 0px 0px rgba(173,173,173,1);">
+				<label>
+					<b style="font-size:25px;">Edit Queue <%- selected[0].QID %></b>
+				</label>
+				<form class="form-horizontal" style="margin:0; padding:0;">
 					<div class="form-group">
-						<label class="col-sm-2 control-label">
-							<div style="color:red; display: inline;">*</div>
-						Client :</label>
-						<div class="col-sm-5">
-							<input type="text" class="form-control" name='client_form' id="client_form"
-							<% var a=selected[0].client %>
-							value= "<%= a %>"
-							placeholder="Client name..." required>
+						<div class="col-sm-2">
+							<a href="view_edit">
+								<button type="button" class="btn btn-default btn-sm" style="width:100%;">
+								View queue
+							</button>
+						</a>
 						</div>
-						<label class="col-sm-2 control-label">Quotation number :</label>
-						<div class="col-sm-3">
-							<input type="text" name='quotation_number' id="quotation_number" class=" form-control"
-							placeholder="auto generate quotation no." value="<%-selected[0].QID %>"
-							disabled>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-sm-2 control-label">Job description :</label>
-						<div class="col-sm-5">
-							<textarea rows="4" class="form-control" style="width:100%; resize: none;" id="job_description_form" name="job_description_form"><%-selected[0].Job_description %></textarea>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-sm-2 control-label">Photographer :</label>
-						<div class="col-sm-5">
-							<input type="text" class="form-control" id="Photographer_form" name="Photographer_form"
-							placeholder="photographer name..." value='<%-selected[0].photographer %>' >
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-sm-2 control-label">
-							<div style="color:red; display: inline;">*</div>
-						Shooting date :</label>
-						<div class="col-sm-5">
-							<div class="input-group">
-								<input type="text" class="form-control" id='date_picker' placeholder="Username"
-								aria-describedby="basic-addon1" name="date_picker">
-								<span class="input-group-addon" id="basic-addon1"><span class="glyphicon glyphicon-calendar"
-								aria-hidden="true"></span></span>
-							</div>
-							<input type="text" class="form-control" id="date_picker_dummy_start" placeholder="Username"
-							aria-describedby="basic-addon1" name="date_picker_dummy_start" style="display: none;">
-							<input type="text" class="form-control" id='date_picker_dummy_end' placeholder="Username"
-							aria-describedby="basic-addon1" name="date_picker_dummy_end" style="display: none;">
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-sm-2 control-label">Assignment :</label>
-						<div class="col-sm-5">
-							<select class="form-control" id="assignment_selector" name="assignment_selector">
-								<option>Studio rental</option>
-								<option>Studio rental + Location</option>
-								<option>Equipment rental</option>
-								<option>Onscreen room</option>
-								<option>Production</option>
-							</select>
-						</div>
-					</div>
-					<div id="room-group-form">
-						<div class="form-group">
-							<label class="col-sm-2 control-label">Studio room :</label>
-							<div class="col-sm-5" id="room_set">
-								<select class="form-control" id="room_selector" name="room_selector">
-									<option value="rs01">Studio room S</option>
-									<option value="rs02">Studio room M</option>
-									<option value="rs03">Studio room L</option>
-									<option value="rs04">Studio room XL</option>
-									<option value="rs05">Studio room G</option>
-								</select>
-							</div>
-							<div class="col-sm-1">
-								<button type="button" class="btn btn-default" id="add_room">+</button>
-							</div>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-sm-2 control-label">Status :</label>
-						<div class="col-sm-5">
-							<select class="form-control" id="status_selector" name="status_selector">
-								<option style="color:#ff992c;">Tentative</option>
-								<option style="color: #128A42;">Confirm</option>
-								<option style="color: red;">Cancel</option>
-							</select>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-sm-2 control-label">Time :</label>
-						<div class="col-sm-5">
-							<select class="form-control" name='time_form' id="time_form" placeholder="Client name...">
-								<option style="display:none;"></option>
-							</select>
-						</div>
-					</div>
-					<div id="assistant-group-form">
-					</div>
-					<div id="detail-form">
-						<div class="head"></div>
-						<div class=" panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-						</div>
-					</div>
-					<div class="form-group">
-						<div class="col-sm-12">
-							<ul style="display: inline;" class="pull-right">
-								<li style="display: inline; padding-right: 10px;">
-									<button type="submit" id="submit" class="btn btn-default">Save</button>
-								</li>
-								<li style="display: inline;">
-									<button type="button" id="add_detail" class="btn btn-default button">Add more detail</button>
-								</li>
-							</ul>
+						<div class="col-sm-2">
+							<a href="close_job">
+								<button type="button" class="btn btn-default btn-sm" style="width:80%;"><span class="glyphicon glyphicon-check"></span>Close job</button>
+							</a>
 						</div>
 					</div>
 				</form>
 			</div>
-			<script src="../javascripts/jquery-1.11.3.min.js"></script>
-			<script src="../bootstrap-3.3.4-dist/js/bootstrap.js"></script>
-			<script src="../javascripts/moment.min.js"></script>
-			<script src="../javascripts/daterangepicker.js"></script>
-			<script src="../javascripts/main_edit.js"></script>
-			<script src="../javascripts/date_control.js"></script>
-			<script src="../javascripts/navigation.js"></script>
-			<script type="text/javascript">
-			var assignment_selector = <%-JSON.stringify(selected) %> ;
-			var ass = <%- JSON.stringify(ass) %> ;
-			$(document).ready(function() {
-				if (assignment_selector[0].assignment == "Production") {
-					if (assignment_selector[0].room_name != "Onscreen room") {
-						var dummy = $("<div class='form-group'><label class='col-sm-2 control-label'>Onscreen room :</label>" +
-							"<div class='col-sm-5'>" +
-							"<select class='form-control' id='room_selectorx' name='room_selectorx'>" +
-							"<option>None</option><option value='ro01'>Onscreen room</option>" +
-							"</select>" +
-							"</div>" +
-							"</div>"
-						);
-
-					} else {
-						var dummy = $("<div class='form-group'><label class='col-sm-2 control-label'>Onscreen room :</label>" +
-							"<div class='col-sm-5'>" +
-							"<select class='form-control' id='room_selectorx' name='room_selectorx'>" +
-							"<option value='ro01'>Onscreen room</option><option>None</option>" +
-							"</select>" +
-							"</div>" +
-							"</div>"
-						);
-					}
-					dummy.prependTo($('#room-group-form'));
-				}
-				for (var i = 0; i < ass.length; i++) {
-					if (i == 0) {
-						var html = $("<div class='form-group'>" +
-							"<label class='col-sm-2 control-label'>Assistant :</label>" +
-							"<div class='col-sm-5'> " +
-							"<input type='text' value=" + "'" + ass[i].assistance + "'" + "class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...'> " +
-							"</div>" +
-							"<div class='col-sm-1'>" +
-							"<button type='button' class='btn btn-default' id='add_assistant'>+</button>" +
-							"</div>" +
-							"</div>");
-					} else {
-						var html = $("<div class='form-group'><div class='col-sm-2'></div><div class='col-sm-5'> " +
-							"<input type='text' value=" + "'" + ass[i].assistance + "'" + "class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...'> " +
-							"</div>"+
-							"<div class='col-sm-1'>" +
-							"<button type='button' class='btn btn-default' id='delete_assistant'>-</button>" +
-							"</div>" +
-							"</div>");
-					}
-					html.appendTo("#assistant-group-form");
-
-				}
-				if (ass.length == 0) {
-					var html = $("<div class='form-group'><label class='col-sm-2 control-label'>Assistant :</label><div class='col-sm-5'> " +
-						"<input type='text' class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...'> " +
-						"</div><div class='col-sm-1'>" +
-							"<button type='button' class='btn btn-default' id='add_assistant'>+</button>" +
-							"</div></div>");
-					html.appendTo("#assistant-group-form");
-				}
+			<form class="form-horizontal" action="confirm_edit_queue" method="post">
+				<div id="tester"></div>
+				<input style="display:none;" type="text" name="somefakename"/>
+				<input style="display:none;" type="password" name="anotherfakename"/>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">
+						<div style="color:red; display: inline;">*</div>
+					Client :</label>
+					<div class="col-sm-5">
+						<input type="text" class="form-control" name='client_form' id="client_form"
+						<% var a=selected[0].client %>
+						value= "<%= a %>"
+						placeholder="Client name..." required>
+					</div>
+					<label class="col-sm-2 control-label">Quotation number :</label>
+					<div class="col-sm-3">
+						<input type="text" name='quotation_number' id="quotation_number" class=" form-control"
+						placeholder="auto generate quotation no." value='<%-selected[0].QID %>'
+						readonly='true'>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">Job description :</label>
+					<div class="col-sm-5">
+						<textarea rows="4" class="form-control" style="width:100%; resize: none;" id="job_description_form" name="job_description_form"><%-selected[0].Job_description %></textarea>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">Photographer :</label>
+					<div class="col-sm-5">
+						<input type="text" class="form-control" id="Photographer_form" name="Photographer_form"
+						placeholder="photographer name..." value='<%-selected[0].photographer %>' >
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">
+						<div style="color:red; display: inline;">*</div>
+					Shooting date :</label>
+					<div class="col-sm-5">
+						<div class="input-group">
+							<input type="text" class="form-control" id='date_picker' placeholder="Username"
+							aria-describedby="basic-addon1" name="date_picker">
+							<span class="input-group-addon" id="basic-addon1"><span class="glyphicon glyphicon-calendar"
+							aria-hidden="true"></span></span>
+						</div>
+						<input type="text" class="form-control" id="date_picker_dummy_start" placeholder="Username"
+						aria-describedby="basic-addon1" name="date_picker_dummy_start" style="display: none;">
+						<input type="text" class="form-control" id='date_picker_dummy_end' placeholder="Username"
+						aria-describedby="basic-addon1" name="date_picker_dummy_end" style="display: none;">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">Assignment :</label>
+					<div class="col-sm-5">
+						<select class="form-control" id="assignment_selector" name="assignment_selector">
+							<option>Studio rental</option>
+							<option>Studio rental + Location</option>
+							<option>Equipment rental</option>
+							<option>Onscreen room</option>
+							<option>Production</option>
+						</select>
+					</div>
+				</div>
+				<div id="room-group-form">
+					<div class="form-group">
+						<label class="col-sm-2 control-label">Studio room :</label>
+						<div class="col-sm-5" id="room_set">
+							<select class="form-control" id="room_selector" name="room_selector">
+								<option value="rs01">Studio room S</option>
+								<option value="rs02">Studio room M</option>
+								<option value="rs03">Studio room L</option>
+								<option value="rs04">Studio room XL</option>
+								<option value="rs05">Studio room G</option>
+							</select>
+						</div>
+						<div class="col-sm-1">
+							<button type="button" class="btn btn-default" id="add_room">+</button>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">Status :</label>
+					<div class="col-sm-5">
+						<select class="form-control" id="status_selector" name="status_selector">
+							<option style="color:#ff992c;">Tentative</option>
+							<option style="color: #128A42;">Confirm</option>
+							<option style="color: red;">Cancel</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">Time :</label>
+					<div class="col-sm-5">
+						<select class="form-control" name='time_form' id="time_form" placeholder="Client name...">
+							<option style="display:none;"></option>
+						</select>
+					</div>
+				</div>
+				<div id="assistant-group-form">
+				</div>
+				<div id="detail-form">
+					<div class="head"></div>
+					<div class=" panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-12">
+						<ul style="display: inline;" class="pull-right">
+							<li style="display: inline; padding-right: 10px;">
+								<button type="submit" id="submit" class="btn btn-default">Save</button>
+							</li>
+							<li style="display: inline;">
+								<button type="button" id="add_detail" class="btn btn-default button">Add more detail</button>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<input type='text' name='type' id='type' value='No lighting' style="display:none;">
+			</form>
+		</div>
+		<script src="../javascripts/jquery-1.11.3.min.js"></script>
+		<script src="../bootstrap-3.3.4-dist/js/bootstrap.js"></script>
+		<script src="../javascripts/moment.min.js"></script>
+		<script src="../javascripts/daterangepicker.js"></script>
+		<script src="../javascripts/main_edit.js"></script>
+		<script src="../javascripts/date_control.js"></script>
+		<script src="../javascripts/navigation.js"></script>
+		<script type="text/javascript">
+		var assignment_selector = <%-JSON.stringify(selected) %> ;
+		var ass = <%-JSON.stringify(ass) %> ;
+		var startDate = assignment_selector[0].shooting_date_start.replace(/[^\d-]/g, '');
+		var endDate = assignment_selector[0].shooting_date_end.replace(/[^\d-]/g, '');
+		$(document).ready(function() {
+			function getSwapDate(date) { // swap to ensure correct pattern for sending to form
+				var temp_s = date.split('-');
+				var swapArrayElements = function(arr, indexA, indexB) {
+					var temp = arr[indexA];
+					arr[indexA] = arr[indexB];
+					arr[indexB] = temp;
+				};
+				swapArrayElements(temp_s, 0, 2);
+				var dateFinal = temp_s.join("-");
+				return dateFinal
+			}
+			$('#date_picker_dummy_start').val(getSwapDate(startDate));
+			$('#date_picker_dummy_end').val(getSwapDate(endDate));
+			$('#date_picker').daterangepicker({
+				locale: {
+					format: 'DD/MM/YYYY'
+				},
+				"startDate": startDate,
+				"endDate": endDate
+			}, function(start, end, label) {
+				//console.log("New date range selected:" + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD') + ' (predefined range: ' + label);
+				var start_date = start.format('YYYY-MM-DD');
+				var end_date = end.format('YYYY-MM-DD');
+				$('#date_picker_dummy_start').val(start_date);
+				$('#date_picker_dummy_end').val(end_date);
+			});
+			if (assignment_selector[0].assignment == "Production") {
 				if (assignment_selector[0].room_name != "Onscreen room") {
-					for (var i = 0; i < assignment_selector.length - 1; i++) {
-						$("#add_room").click();
-					}
+					var dummy = $("<div class='form-group'><label class='col-sm-2 control-label'>Onscreen room :</label>" +
+						"<div class='col-sm-5'>" +
+						"<select class='form-control' id='room_selectorx' name='room_selectorx'>" +
+						"<option>None</option><option value='ro01'>Onscreen room</option>" +
+						"</select>" +
+						"</div>" +
+						"</div>"
+					);
 				} else {
-					for (var i = 0; i < assignment_selector.length - 2; i++) {
-						$("#add_room").click();
-					}
+					var dummy = $("<div class='form-group'><label class='col-sm-2 control-label'>Onscreen room :</label>" +
+						"<div class='col-sm-5'>" +
+						"<select class='form-control' id='room_selectorx' name='room_selectorx'>" +
+						"<option value='ro01'>Onscreen room</option><option>None</option>" +
+						"</select>" +
+						"</div>" +
+						"</div>"
+					);
 				}
-				var test = false;
-				for (var i = 0; i < assignment_selector.length; i++) {
-					if (i == 0) {
-						$("#room_selector").find("option").each(function() {
-							if (assignment_selector[0].room_name != "Onscreen room") {
-								if (assignment_selector[i].room_name == $(this).text()) {
-									$(this).attr("selected", "");
-								}
-							} else {
+				dummy.prependTo($('#room-group-form'));
+			}
+			if (assignment_selector[0].assignment == "Onscreen room") {
+				var dummy = $("<div class='form-group'><label class='col-sm-2 control-label'>Onscreen room :</label>" +
+					"<div class='col-sm-5'>" +
+					"<select class='form-control' id='room_selectorx' name='room_selectorx'>" +
+					"<option value='ro01'>Onscreen room</option>" +
+					"<option>None</option>" +
+					"</select>" +
+					"</div>" +
+					"</div>"
+				);
+				dummy.prependTo($('#room-group-form').empty());
+			}
+			for (var i = 0; i < ass.length; i++) {
+				if (i == 0) {
+					var html = $("<div class='form-group'>" +
+						"<label class='col-sm-2 control-label'>Assistant :</label>" +
+						"<div class='col-sm-5'> " +
+						"<input type='text' value=" + "'" + ass[i].assistance + "'" + "class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...'> " +
+						"</div>" +
+						"<div class='col-sm-1'>" +
+						"<button type='button' class='btn btn-default' id='add_assistant'>+</button>" +
+						"</div>" +
+						"</div>");
+				} else {
+					var html = $("<div class='form-group'><div class='col-sm-2'></div><div class='col-sm-5'> " +
+						"<input type='text' value=" + "'" + ass[i].assistance + "'" + "class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...'> " +
+						"</div>" +
+						"<div class='col-sm-1'>" +
+						"<button type='button' class='btn btn-default' id='delete_assistant'>-</button>" +
+						"</div>" +
+						"</div>");
+				}
+				html.appendTo("#assistant-group-form");
+			}
+			if (ass.length == 0) {
+				var html = $("<div class='form-group'><label class='col-sm-2 control-label'>Assistant :</label><div class='col-sm-5'> " +
+					"<input type='text' class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...'> " +
+					"</div><div class='col-sm-1'>" +
+					"<button type='button' class='btn btn-default' id='add_assistant'>+</button>" +
+					"</div></div>");
+				html.appendTo("#assistant-group-form");
+			}
+			if (assignment_selector[0].room_name != "Onscreen room") {
+				for (var i = 0; i < assignment_selector.length - 1; i++) {
+					$("#add_room").click();
+				}
+			} else {
+				for (var i = 0; i < assignment_selector.length - 2; i++) {
+					$("#add_room").click();
+				}
+			}
+			var test = false;
+			for (var i = 0; i < assignment_selector.length; i++) {
+				if (i == 0) {
+					$("#room_selector").find("option").each(function() {
+						if (assignment_selector[0].room_name != "Onscreen room") {
+							if (assignment_selector[i].room_name == $(this).text()) {
+								$(this).attr("selected", "");
+							}
+						} else {
+							if (assignment_selector.length > 1) {
 								if (assignment_selector[i + 1].room_name == $(this).text()) {
 									$(this).attr("selected", "");
 									test = true;
 								}
 							}
-
-						});
-					} else {
-						$("#room_selector" + i).find("option").each(function() {
-							if (test) {
-								if (assignment_selector[i + 1].room_name == $(this).text()) {
-									$(this).attr("selected", "");
-								}
-							} else {
-								if (assignment_selector[i].room_name == $(this).text()) {
-									$(this).attr("selected", "");
-								}
-							}
-
-						});
-					}
-				}
-				$("#assignment_selector").find("option").each(function() { // change the selected of assignment
-					if (assignment_selector[0].assignment == $(this).text()) {
-						$(this).attr("selected", "");
-					}
-				});
-				if (assignment_selector[0].assignment == "Equipment rental") {
-					$('#room_selector').empty().append("<option>None</option>");
-					$("#add_room").css({
-						"display": "none"
+						}
 					});
 				} else {
-					$("#add_room").css({
-						"display": "block"
+					$("#room_selector" + i).find("option").each(function() {
+						if (test) {
+							if (assignment_selector[i + 1].room_name == $(this).text()) {
+								$(this).attr("selected", "");
+							}
+						} else {
+							if (assignment_selector[i].room_name == $(this).text()) {
+								$(this).attr("selected", "");
+							}
+						}
 					});
 				}
-				$("#status_selector").find("option").each(function() {
-					if (assignment_selector[0].status == $(this).text()) {
-						$(this).attr("selected", "");
-					}
-				});
-				$("#time_form").find("option").each(function() { // change time as the selected
-					var time = assignment_selector[0].time_start;
-					time = time.slice(0, 5);
-					console.log(time);
-					if (time == $(this).text()) {
-						$(this).attr("selected", "");
-					}
-				});
-
+			}
+			$("#assignment_selector").find("option").each(function() { // change the selected of assignment
+				if (assignment_selector[0].assignment == $(this).text()) {
+					$(this).attr("selected", "");
+				}
 			});
-		</script>
-	</body>
+			if (assignment_selector[0].assignment == "Equipment rental") {
+				$('#room_selector').empty().append("<option>None</option>");
+				$("#add_room").css({
+					"display": "none"
+				});
+			} else {
+				$("#add_room").css({
+					"display": "block"
+				});
+			}
+			$("#status_selector").find("option").each(function() {
+				if (assignment_selector[0].status == $(this).text()) {
+					$(this).attr("selected", "");
+				}
+			});
+			$("#time_form").find("option").each(function() { // change time as the selected
+				var time = assignment_selector[0].time_start;
+				time = time.slice(0, 5);
+				if (time == $(this).text()) {
+					$(this).attr("selected", "");
+				}
+			});
+		});
+</script>
+</body>
 </html>

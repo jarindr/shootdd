@@ -18,10 +18,10 @@
 				<form class="form-horizontal" style="margin:0; padding:0;">
 					<div class="form-group">
 						<div class="col-sm-2">
-							<a href="view"><button type="button" class="btn btn-default" style="width:100%;">Edit queue</button></a>
+							<a href="view"><button type="button" class="btn btn-default btn-sm" style="width:100%;">Edit queue</button></a>
 						</div>
 						<div class="col-sm-2">
-							<a href="close_job"><button type="button" class="btn btn-default" style="width:100%;">Close job</button></a>
+							<a href="close_job"><button type="button" class="btn btn-default btn-sm" style="width:100%;">Close job</button></a>
 						</div>
 					</div>
 				</form>
@@ -150,93 +150,115 @@
 		<script src="../javascripts/date_control.js"></script>
 		<script src="../javascripts/navigation.js"></script>
 		<script type="text/javascript">
-					var assignment_selector = <%- JSON.stringify(selected) %> ;
-					var ass = <%- JSON.stringify(ass) %> ;
+					var assignment_selector = <%-JSON.stringify(selected) %> ;
+					var ass = <%-JSON.stringify(ass) %> ;
+					var startDate = assignment_selector[0].shooting_date_start.replace(/[^\d-]/g, '');
+					var endDate = assignment_selector[0].shooting_date_end.replace(/[^\d-]/g, '');
 					$(document).ready(function() {
-						if (assignment_selector[0].assignment == "Production") {
-							if (assignment_selector[0].room_name != "Onscreen room") {
-								var dummy = $("<div class='form-group'><label class='col-sm-2 control-label'>Onscreen room :</label>" +
-									"<div class='col-sm-5'>" +
-									"<select class='form-control' id='room_selectorx' name='room_selectorx' disabled>" +
-									"<option value='ro01'>Onscreen room</option>" +
-									"<option>None</option>" +
-									"</select>" +
-									"</div>" +
-									"</div>"
-								);
-								dummy.prependTo($('#room-group-form'));
-							}
-						}
-						for (var i = 0; i < ass.length; i++) {
-							if (i == 0) {
-								var html = $("<div class='form-group'><label class='col-sm-2 control-label'>Assistant :</label><div class='col-sm-5'> " +
-									"<input type='text' value=" + "'" + ass[i].assistance + "'" + "class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...' disabled> " +
-									"</div></div>");
-							} else {
-								var html = $("<div class='form-group'><div class='col-sm-2'></div><div class='col-sm-5'> " +
-									"<input type='text' value=" + "'" + ass[i].assistance + "'" + "class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...' disabled> " +
-									"</div></div>");
-							}
-							html.appendTo("#assistant-group-form");
+						startDate = startDate.replace(/-/g, "/");
+						endDate = endDate.replace(/-/g, "/");
+						$('#date_picker').daterangepicker({
+							locale: {
+								format: 'DD/MM/YYYY'
+							},
 
+							"startDate": startDate,
+							"endDate": endDate
+
+						}, function(start, end, label) {
+							//console.log("New date range selected:" + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD') + ' (predefined range: ' + label);
+							var start_date = start.format('YYYY-MM-DD');
+							var end_date = end.format('YYYY-MM-DD');
+							$('#date_picker_dummy_start').val(start_date);
+							$('#date_picker_dummy_end').val(end_date);
+						});
+					if (assignment_selector[0].assignment == "Production") {
+						if (assignment_selector[0].room_name != "Onscreen room") {
+							var dummy = $("<div class='form-group'><label class='col-sm-2 control-label'>Onscreen room :</label>" +
+								"<div class='col-sm-5'>" +
+								"<select class='form-control' id='room_selectorx' name='room_selectorx' disabled>" +
+								"<option value='ro01'>Onscreen room</option>" +
+								"<option>None</option>" +
+								"</select>" +
+								"</div>" +
+								"</div>"
+							);
+							dummy.prependTo($('#room-group-form'));
 						}
-						if (ass.length == 0) {
+					}
+
+					for (var i = 0; i < ass.length; i++) {
+						if (i == 0) {
 							var html = $("<div class='form-group'><label class='col-sm-2 control-label'>Assistant :</label><div class='col-sm-5'> " +
-								"<input type='text' class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...' disabled> " +
+								"<input type='text' value=" + "'" + ass[i].assistance + "'" + "class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...' disabled> " +
 								"</div></div>");
-							html.appendTo("#assistant-group-form");
+						} else {
+							var html = $("<div class='form-group'><div class='col-sm-2'></div><div class='col-sm-5'> " +
+								"<input type='text' value=" + "'" + ass[i].assistance + "'" + "class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...' disabled> " +
+								"</div></div>");
 						}
-						for (var i = 0; i < assignment_selector.length - 1; i++) {
-							$("#add_room").click();
-						}
-						for (var i = 0; i < assignment_selector.length; i++) {
-							if (i == 0) {
-								$("#room_selector").find("option").each(function() {
-									if (assignment_selector[i].room_name == $(this).text()) {
-										$(this).attr("selected", "");
-									}
-								});
-							} else {
-								$("#room_selector" + i).find("option").each(function() {
-									if (assignment_selector[i].room_name == $(this).text()) {
-										$(this).attr("selected", "");
-									}
-								});
-							}
-						}
-						$("#room_selectorx").find("option").each(function() {
-							if (assignment_selector[0].room_name != "Onscreen room") {
-								if ($(this).text() == "None") {
+						html.appendTo("#assistant-group-form");
+
+					}
+					if (ass.length == 0) {
+						var html = $("<div class='form-group'><label class='col-sm-2 control-label'>Assistant :</label><div class='col-sm-5'> " +
+							"<input type='text' class='form-control' id='assistant_form' name='assistant_form' placeholder = 'Assistant name ...' disabled> " +
+							"</div></div>");
+						html.appendTo("#assistant-group-form");
+					}
+					for (var i = 0; i < assignment_selector.length - 1; i++) {
+						$("#add_room").click();
+					}
+					for (var i = 0; i < assignment_selector.length; i++) {
+						if (i == 0) {
+							$("#room_selector").find("option").each(function() {
+								if (assignment_selector[i].room_name == $(this).text()) {
 									$(this).attr("selected", "");
 								}
-							}
-						});
-						$("#assignment_selector").find("option").each(function() { // change the selected of assignment
-							if (assignment_selector[0].assignment == $(this).text()) {
-								$(this).attr("selected", "");
-							}
-						});
-						if (assignment_selector[0].assignment == "Equipment rental") {
-							$('#room_selector').empty().append("<option>None</option>");
+							});
+						} else {
+							$("#room_selector" + i).find("option").each(function() {
+								if (assignment_selector[i].room_name == $(this).text()) {
+									$(this).attr("selected", "");
+								}
+							});
 						}
-						$("#status_selector").find("option").each(function() {
-							if (assignment_selector[0].status == $(this).text()) {
+					}
+					$("#room_selectorx").find("option").each(function() {
+						if (assignment_selector[0].room_name != "Onscreen room") {
+							if ($(this).text() == "None") {
 								$(this).attr("selected", "");
 							}
-						});
-						$("#time_form").find("option").each(function() { // change time as the selected
-							var time = assignment_selector[0].time_start;
-							time = time.slice(0, 5);
-							console.log(time);
-							if (time == $(this).text()) {
-								$(this).attr("selected", "");
-							}
-						});
-						if (assignment_selector[0].room_name == "Onscreen room") {
-							$('#room_selector').empty().append("<option value='ro01'>Onscreen room</option><option>None</option>");
-							$('#room_selector').parent().parent().find(".col-sm-1").find("#add_room").hide();
 						}
 					});
+					$("#assignment_selector").find("option").each(function() { // change the selected of assignment
+						if (assignment_selector[0].assignment == $(this).text()) {
+							$(this).attr("selected", "");
+						}
+					});
+					if (assignment_selector[0].assignment == "Equipment rental") {
+						$('#room_selector').empty().append("<option>None</option>");
+					}
+					$("#status_selector").find("option").each(function() {
+						if (assignment_selector[0].status == $(this).text()) {
+							$(this).attr("selected", "");
+						}
+					});
+
+					$("#time_form").find("option").each(function() { // change time as the selected
+						var time = assignment_selector[0].time_start;
+						time = time.slice(0, 5);
+						console.log(time);
+						if (time == $(this).text()) {
+							$(this).attr("selected", "");
+						}
+					});
+					if (assignment_selector[0].room_name == "Onscreen room") {
+						$('#room_selector').empty().append("<option value='ro01'>Onscreen room</option>");
+						$('#room_selector').parent().parent().find(".col-sm-1").find("#add_room").hide();
+					}
+					});
+
 		</script>
 	</body>
 </html>

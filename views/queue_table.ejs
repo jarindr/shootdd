@@ -22,7 +22,7 @@ opacity:0.5;
         <td><%= data[i].client %></td>
         <td><%= data[i].time_start.toString().slice(0,5); %></td>
         <td><%- data[i].Job_description.replace(/\r?\n/g,'<br />'); %></td>
-        <td><b style="color:orange;"><%= data[i].status %></b></td>
+        <td id="status"><b><%= data[i].status %></b></td>
         <td><%- data[i].assignment %></td>
         <td><%- data[i].room_name %></td>
         <td><%- data[i].photographer %></td>
@@ -60,6 +60,16 @@ $(".table-loop").find("tr").each(function(index, el) {
     }
     if (day == "Sun") {
         $(this).css('background-color', '#FFC1C1');
+    }
+    var status=$(this).find('#status').text();
+    if(status=="Cancel"){
+        $(this).css('color', 'red');
+    }
+        if(status=="Confirm"){
+        $(this).find('#status').css('color', 'green');
+    }
+        if(status=="Tentative"){
+        $(this).find('#status').css('color', 'orange');
     }
 });
 $(".table-data").hover(function() {

@@ -16,6 +16,7 @@ var click = false;
 var equip_amount = [];
 var auto_add_detail = true; // set value of auto add detail button click
 var description = {};
+var type;
 $(document).ready(function() {
     setMenuClicked();
     $(".btn").mouseup(function() {
@@ -63,51 +64,18 @@ $(document).ready(function() {
                 $(equip_unique_data).each(function(index, el) {
                     description[el.description].push(el.EID);
                 });
-                if (auto_add_detail) {
-                    $("#add_detail").click();
-                }
+                $.getJSON('http://localhost:3000/dump_qid_status', function(statusa) {
+                    type = statusa[0].type;
+                    console.log(type);
+                    if (auto_add_detail) {
+                        $("#add_detail").click();
+                    }
+                });
             });
 
 
         });
 
-    });
-
-    $("#add_assistant").click(function() { // set adding assistance
-        var html = $("<div class='form-group'><div class='col-sm-2'></div><div class='col-sm-5'> " +
-            "<input type='text' class='form-control' id='assistant_form" + counter + "'" + "name='assistant_form" + counter + "'" +
-            " placeholder = 'Assistant name ...' > " +
-            "</div>" + "<div class='col-sm-1'>" +
-            "<button type='button' class='btn btn-default' id='delete_room'>-</button>" +
-            "</div>" + "</div>");
-        html.appendTo("#assistant-group-form");
-        html.hide().show('fast');
-        counter++;
-    });
-    $("#room-group-form").on('click', '#add_room', function() { //set adding room
-        var html = $("<div class='form-group'><label class='col-sm-2 control-label'></label>" +
-            "<div class='col-sm-5'>" +
-            "<select class='form-control' id='room_selector" + room_counter + "'" + "name='room_selector" + room_counter + "' disabled>" +
-            "<option value='rs01'>Studio room S</option>" +
-            "<option value='rs02'>Studio room M</option>" +
-            "<option value='rs03'>Studio room L</option>" +
-            "<option value='rs04'>Studio room XL</option>" +
-            "<option value='rs05'>Studio room G</option>" +
-            "</select>" +
-            "</div>" +
-            "<div class='col-sm-1'>" +
-            "</div>" +
-            "</div>");
-        html.appendTo("#room-group-form");
-        html.hide().show('fast');
-        room_counter++;
-    });
-
-    $("#room-group-form").on("click", "#delete_room", function() { // set binding event to room-group-form delete out 
-        $(this).parent().parent().hide('fast');
-    });
-    $("#assistant-group-form").on("click", "#delete_room", function() { // set binding event to room-group-form delete out 
-        $(this).parent().parent().hide('fast');
     });
     $("#submit").click(function(event) { // equipment input for sending to route
         var form_html = "";
@@ -173,7 +141,7 @@ $(document).ready(function() {
                             if (count[nType][x] != 0) {
                                 codes += "<li class='list-group-item'><b>" + equipArray[nType][x] + " (" + count[nType][x] + ")" + "</b>";
                                 for (var c = 0; c < count[nType][x]; c++) {
-                                    codes += "<select class='form-control' style='margin-top:5px;'>";
+                                    codes += "<select class='form-control equip_options' id='equip_options' style='margin-top:5px;'>";
                                     for (var k = 0; k < description[equipArray[nType][x]].length; k++) {
                                         codes += "<option>" + description[equipArray[nType][x]][k] + "</option>";
                                     }
@@ -196,7 +164,7 @@ $(document).ready(function() {
                 html2 = $("<div class='form-group'>" +
                     "<label class='col-sm-2 control-label'>Studio type :</label>" +
                     "<div class='checkbox col-sm-2' style='margin-right: 0'>" +
-                    "<label> <input type='checkbox'checked='true' disabled> With lighting Prophoto</label> </div> " +
+                    "<label> <input type='checkbox' disabled> With lighting Prophoto</label> </div> " +
                     "<div class='checkbox col-sm-2'> " +
                     "<label> " +
                     "<input type='checkbox' disabled> With lighting Broncolor</label> " +
@@ -249,12 +217,17 @@ $(document).ready(function() {
                 }
                 firstTime = false;
             }
-            $("#description-toggle").click();
             ac.hide().show('slow');
         } else {
             ac.hide('fast');
             $(this).text("More detail");
         }
+        reCheckEquip();
+        $('input[type="checkbox"]').each(function(index, el) {
+            if ($(el).parent().text().trim() == type) {
+                el.checked = true;
+            }
+        });
     });
     $(document).on("click", "#button", function() { // accordion for binding event click on + - button update value
         var $button = $(this);
@@ -274,86 +247,70 @@ $(document).ready(function() {
 
 
     });
-    $('#assignment_selector').on('change', function() {
-        var selected = $('#assignment_selector').val();
-        if (selected == "Studio rental" || selected == "Studio rental + Location") {
-            var dummy = $("<div class='form-group'><label class='col-sm-2 control-label'>Studio room :</label>" +
-                "<div class='col-sm-5'>" +
-                "<select class='form-control' id='room_selector' name='room_selector'>" +
-                "<option value='rs01'>Studio room S</option>" +
-                "<option value='rs02'>Studio room M</option>" +
-                "<option value='rs03'>Studio room L</option>" +
-                "<option value='rs04'>Studio room XL</option>" +
-                "<option value='rs05'>Studio room G</option>" +
-                "</select>" +
-                "</div>" +
-                "<div class='col-sm-1'>" +
-                "<button type='button' class='btn btn-default' id='add_room'>+</button>" +
-                "</div>" +
-                "</div>");
-            dummy.appendTo($('#room-group-form').empty()).hide().show('slow');
-        }
-        if (selected == "Production") {
-            var dummy = $("<div class='form-group'><label class='col-sm-2 control-label'>Onscreen room :</label>" +
-                "<div class='col-sm-5'>" +
-                "<select class='form-control' id='room_selectorx' name='room_selectorx'>" +
-                "<option value='ro01'>Onscreen room</option>" +
-                "<option>None</option>" +
-                "</select>" +
-                "</div>" +
-                "</div>" +
-                "<div class='form-group'><label class='col-sm-2 control-label'>Studio room :</label>" +
-                "<div class='col-sm-5'>" +
-                "<select class='form-control' id='room_selector' name='room_selector'>" +
-                "<option value='rs01'>Studio room S</option>" +
-                "<option value='rs02'>Studio room M</option>" +
-                "<option value='rs03'>Studio room L</option>" +
-                "<option value='rs04'>Studio room XL</option>" +
-                "<option value='rs05'>Studio room G</option>" +
-                "</select>" +
-                "</div>" +
-                "<div class='col-sm-1'>" +
-                "<button type='button' class='btn btn-default' id='add_room'>+</button>" +
-                "</div>" +
-                "</div>"
-            );
-            dummy.appendTo($('#room-group-form').empty()).hide().show('slow');
-        }
-        if (selected == "Equipment rental") {
-            var dummy = $("<div class='form-group'><label class='col-sm-2 control-label'>Studio room :</label>" +
-                "<div class='col-sm-5'>" +
-                "<select class='form-control' disabled>" +
-                "<option>None</option>" +
-                "</select>" +
-                "</div>" +
-                "</div>"
-            );
-            dummy.appendTo($('#room-group-form').empty()).hide().show('slow');
-        }
-        if (selected == "Onscreen room") {
-            var dummy = $("<div class='form-group'><label class='col-sm-2 control-label'>Onscreen room :</label>" +
-                "<div class='col-sm-5'>" +
-                "<select class='form-control' id='room_selectorx' name='room_selectorx'>" +
-                "<option value='ro01'>Onscreen room</option>" +
-                "</select>" +
-                "</div>" +
-                "</div>"
-            );
-            
-            dummy.appendTo($('#room-group-form').empty()).hide().show('slow');
-        } else {
-            $(".nav-tabs").show();
-        }
 
-    });
-    $("#accordion").on("change", "input:checkbox", function() { // only one check box and be checked
-        $(this).prop('checked', true);
-        $('input[type="checkbox"]').not(this).prop('checked', false);
-    });
 
-    function setMenuClicked() { //function for menu on state
-        var curentFile = window.location.pathname.split("/").pop();
-        if (curentFile == "") curentFile = "Default.aspx";
-        $('ul.nav > li > a[href="' + curentFile + '"]').parent().addClass('active');
+    function reCheckEquip() {
+        var runner = 0;
+        var selected = [];
+        $(".list-group").each(function(index, el) {
+            $(el).find('.list-group-item').each(function(index, ela) {
+                $(ela).find('select').each(function(index, els) {
+                    $(els).find('option').each(function(index, els) {
+                        if (index == runner) {
+                            els.selected = true;
+                            selected.push($(els).val());
+                            return false;
+                        }
+                    });
+                    runner++;
+                });
+                runner = 0;
+            });
+
+        });
+        $('.list-group-item').find('option').each(function(index, el) {
+            if (el.selected == false) {
+                if ($.inArray($(el).val(), selected) != -1) {
+                    $(el).css({
+                        'display': 'none'
+                    });
+                } else {
+                    $(el).css({
+                        'display': 'block'
+                    });
+                }
+            }
+        });
     }
+    $("#close_job").click(function(event) {
+        var form_html = "";
+        $('.equip_options').each(function(index, el) {
+            var item = $(el).val();
+            form_html += "<input type='text' name='equip_item' value='" + item + "' style='display:none;'></div>";
+        });
+        var $form_html = $(form_html);
+        $form_html.appendTo($(".form-horizontal"));
+    });
+    $(document).on('change', '#equip_options', function(event) { // check when change equip value of close job
+        var selected = [];
+        $('.list-group-item').find('option').each(function(index, el) {
+            if (el.selected == true) {
+                selected.push($(el).val());
+            }
+
+        });
+        $('.list-group-item').find('option').each(function(index, el) {
+            if (el.selected == false) {
+                if ($.inArray($(el).val(), selected) != -1) {
+                    $(el).css({
+                        'display': 'none'
+                    });
+                } else {
+                    $(el).css({
+                        'display': 'block'
+                    });
+                }
+            }
+        });
+    });
 });

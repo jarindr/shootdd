@@ -30,7 +30,13 @@
 		<script src="../javascripts/table_handler.js"></script>
 		<script type="text/javascript">
 		var curr = new Date(); // get current date
-		var first = curr.getDate() - curr.getDay() + 1; // First day is the day of the month - the day of the week
+		var getDayTemp;
+		if(curr.getDay()==0){
+			getDayTemp=7;
+		}else{
+			getDayTemp=curr.getDay();
+		}
+		var first = curr.getDate() - getDayTemp + 1; // First day is the day of the month - the day of the week
 		var last = first + 6; // last day is the first day + 6
 		var firstday = new Date(curr.setDate(first)).toDateString();
 		var lastday = new Date(curr.setDate(last)).toDateString();
@@ -38,7 +44,7 @@
 		var current = 0;
 		var today, todayNumber, previousWeek, week, mondayNumber, monday,sunday,sundayNumber;
 		today = new Date();
-		todayNumber = today.getDay();
+		todayNumber = getDayTemp;
 		previousWeek = 1; //For every week you want to go back the past fill in a lower number.
 		$(".show_week").text(firstday + " - " + lastday);
 		$('#next').click(function() {

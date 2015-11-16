@@ -20,12 +20,71 @@ router.get('/newQueue', function(req, res, next) {
 });
 router.post('/newQueue', function(req, res, next) {});
 router.get('/dump_equipment_data', function(req, res, next) {
-
     var query = "SELECT *,COUNT(Description) AS count FROM equipment GROUP BY Description ORDER BY type";
     connection.query(query, function(err, rows, fields) {
         res.send(rows);
     });
 
+});
+router.post('/confirm_close_job', function(req, res, next) {
+    var close_equip_data = [];
+    var QID = req.session.QID;
+    var OT = req.body.ot_form;
+    for (var key in req.body) {
+        if (req.body.hasOwnProperty(key)) {
+            if (key == "equip_item") {
+                var equipString = req.body[key];
+                for (var i = 0; i < equipString.length; i++) {
+                    close_equip_data.push([QID, equipString[i]]);
+                }
+            }
+        }
+    }
+    var data = {
+        status: 'Closed',
+        OT: OT
+    }
+    if (close_equip_data.length > 0) {
+        connection.query('INSERT INTO booking_use_equipment(QID,EID) VALUE?', [close_equip_data], function(err, row, field) {
+            if (err) {
+                console.log(err);
+            } else {
+                connection.query('UPDATE booking SET? WHERE QID=?', [data, QID], function(err, row, field) { // main data all QID and stuff
+                    if (err) {
+                        console.log("can't insert booking with error code " + err);
+                    } else {
+                        console.log("edit booking complete");
+                    }
+                });
+                res.redirect('confirm_close_job');
+            }
+
+        });
+    } else {
+        res.redirect('confirm_close_job');
+    }
+
+
+});
+router.get('/confirm_close_job', function(req, res, next) {
+    var QID = req.session.QID;
+    res.render('confirm_close_job', {
+        QID: QID
+    });
+});
+router.get('/add_rent_equipment', function(req, res, next) {
+    var query = "SELECT *,COUNT(Description) AS count FROM equipment GROUP BY Description";
+    var temp = "";
+    connection.query(query, function(err, rows, fields) {
+        for (var i = 0; i < rows.length; i++) {
+            if (i != 0) {
+                temp = temp + rows[i].description + ",";
+            }
+        }
+        res.render('add_rent_equipment', {
+            data: temp
+        });
+    });
 });
 //get add show queues page
 router.get('/queues', function(req, res, next) {
@@ -135,6 +194,17 @@ router.post('/view_edit', function(req, res, next) {
     req.session.QID = req.query.QID;
     res.redirect('view_edit');
 });
+router.get('/dump_qid_status', function(req, res, next) {
+    connection.query("SELECT type FROM booking WHERE QID=?", [
+        [req.session.QID]
+    ], function(err, row, fields) {
+        if (err) {
+            console.log(err);
+        }
+        console.log(row);
+        res.send(row);
+    });
+});
 router.get('/view', function(req, res, next) {
     var QID = req.session.QID;
     router.get('/dump_equipment_qid', function(req, res, next) {
@@ -225,8 +295,8 @@ router.get('/queue_table', function(req, res, next) {
         "booking.QID,booking.client," +
         "booking.Job_description," +
         "booking.photographer," +
-        "DATE_FORMAT(shooting_date_start,'%a %d-%m-%Y') shooting_date_start," +
-        "DATE_FORMAT(shooting_date_end,'%a %d-%m-%Y') shooting_date_end," +
+        "shooting_date_start," +
+        "shooting_date_end," +
         "booking.time_start,booking.time_end,booking.status,booking.assignment,room.room_name,booking.status AS assistance" +
         " FROM booking LEFT JOIN (booking_use_room INNER JOIN room ON booking_use_room.RID=room.RID)" +
         "ON booking_use_room.QID=booking.QID " +
@@ -257,7 +327,6 @@ router.get('/queue_table', function(req, res, next) {
             }
 
         }
-
         connection.query(query_ass, function(err, rowsa, field) {
             for (var i = 0; i < rows.length; i++) {
                 rows[i].assistance = "";
@@ -269,15 +338,13 @@ router.get('/queue_table', function(req, res, next) {
                 }
             }
             rl = rows.length;
-            var datea = new Date();
-            var dateArray = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
             var notHave = [];
             var found = false;
-            for (var j = 0; j < dateArray.length; j++) {
+            var weekArray = getWeeks(sort_type);
+            for (var j = 0; j < weekArray.length; j++) {
                 for (var i = 0; i < rl; i++) {
-                    var day = rows[i].shooting_date_start.split('-');
-                    var realDay = day[0].slice(0, 3);
-                    if (dateArray[j] == realDay) {
+                    if (new Date(weekArray[j]).toDateString() == new Date(rows[i].shooting_date_start).toDateString()) {
+                        console.log(weekArray[j]);
                         found = true;
                         break;
                     } else {
@@ -285,7 +352,7 @@ router.get('/queue_table', function(req, res, next) {
                     }
                 }
                 if (!found) {
-                    var date_start = dateArray[j];
+                    var date_start = weekArray[j];
                     var json = {
                         QID: '',
                         client: '',
@@ -302,8 +369,11 @@ router.get('/queue_table', function(req, res, next) {
                     };
                     rows.push(json);
                 }
-
             }
+            rows.sort(function(a, b) {
+                return new Date(a.shooting_date_start) - new Date(b.shooting_date_start)
+            });
+            formateDate(rows);
             res.render('queue_table', {
                 data: rows
             });
@@ -312,6 +382,67 @@ router.get('/queue_table', function(req, res, next) {
     });
 
 });
+
+function formateDate(rows) {
+    var dateArray = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    for (var i = 0; i < rows.length; i++) {
+        var firstday = rows[i].shooting_date_start;
+        var date = firstday.getDate();
+        var month = parseInt(firstday.getMonth()) + 1;
+        var day = dateArray[firstday.getDay()];
+        var year = firstday.getFullYear();
+        var stringFullDate = day + " " + date + "-" + month + "-" + year;
+        rows[i].shooting_date_start = stringFullDate;
+    }
+
+}
+
+function getWeeks(sort_type) {
+    var dateArray = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    var arrayWeek = [];
+    var today, todayNumber, previousWeek, week, mondayNumber, monday, sunday, sundayNumber;
+    var x = 0;
+    previousWeek = 1; //For every week you want to go back the past fill in a lower number. 
+    today = new Date();
+    todayNumber = today.getDay();
+    var curr = new Date(); // get current date
+    var getDayTemp;
+    if (curr.getDay() == 0) {
+        getDayTemp = 7;
+    } else {
+        getDayTemp = curr.getDay();
+    }
+    if (sort_type == 0) {
+        var first = curr.getDate() - getDayTemp + 1; // First day is the day of the month - the day of the week
+        var firstday = new Date(curr.setDate(first)).toDateString();
+        for (var i = 0; i < 7; i++) {
+            var firstday = new Date(curr.setDate(first));
+            var date = firstday.getDate();
+            var month = parseInt(firstday.getMonth()) + 1;
+            var day = dateArray[firstday.getDay()];
+            var year = firstday.getFullYear();
+            var stringFullDate = day + " " + date + "-" + month + "-" + year;
+            arrayWeek.push(firstday);
+            first++;
+        }
+    } else {
+        x = sort_type * 7;
+        week = previousWeek * x;
+        mondayNumber = 1 - getDayTemp + week
+        for (var i = 0; i < 7; i++) {
+            var firstday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + mondayNumber);
+            var date = firstday.getDate();
+            var month = parseInt(firstday.getMonth()) + 1;
+            var day = dateArray[firstday.getDay()];
+            var year = firstday.getFullYear();
+            var stringFullDate = day + " " + date + "-" + month + "-" + year;
+            arrayWeek.push(firstday);
+            mondayNumber++;
+        }
+    }
+    return arrayWeek;
+
+}
 router.post('/queue_table', function(req, res, next) {
     var temp = req.body.data;
 });
@@ -354,7 +485,6 @@ function getQuotationID(row) {
 }
 router.post('/confirm_create_queue', function(req, res, next) {
     console.log("confirm_create_queue connected");
-
     console.log("POST HAVE BEEN CALLED");
     connection.query('SELECT COUNT(*) AS count FROM booking ', function(err, row, field) {
         var id = getQuotationID(row);
@@ -369,7 +499,8 @@ router.post('/confirm_create_queue', function(req, res, next) {
             time_start: req.body.time_form,
             time_end: req.body.time_form,
             status: req.body.status_selector,
-            assignment: req.body.assignment_selector
+            assignment: req.body.assignment_selector,
+            type: req.body.type
 
         };
         if (err) {
@@ -452,7 +583,140 @@ router.post('/confirm_create_queue', function(req, res, next) {
 
 
 });
+router.post('/confirm_add_rent_equipment', function(req, res, next) {
+    var str = req.body.supplier_form + req.body.description_form;
+    var UID = str;
+    var data = {
+        supplier: req.body.supplier_form,
+        description: req.body.description_form,
+        price: req.body.price_form,
+        quantity: req.body.quantity_form,
+        SUID: UID
+    }
+    connection.query("INSERT INTO rented_equipment SET?", data, function(err, row, field) {
+        if (err) {
+            console.log(err);
+        } else {
+            res.redirect('confirm_add_rent_equipment');
+        }
+    });
+});
+router.get('/confirm_add_rent_equipment', function(req, res, next) {
+    res.render('confirm_add_rent_equipment');
+});
+router.get('/dump_rent_equipment', function(req, res, next) {
+    connection.query("SELECT* FROM rented_equipment", function(err, row, field) {
+        res.send(row);
+    });
 
+});
+router.get('/confirm_edit_queue', function(req, res, next) {
+    res.render('confirm_edit_queue');
+});
+router.post('/confirm_edit_queue', function(req, res, next) {
+    console.log("confirm_create_queue connected");
+    console.log("POST HAVE BEEN CALLED");
+    connection.query('SELECT COUNT(*) AS count FROM booking ', function(err, row, field) {
+        var id = req.body.quotation_number;
+        console.log(id);
+        var data = {
+            client: req.body.client_form,
+            job_description: req.body.job_description_form,
+            photographer: req.body.Photographer_form,
+            shooting_date_start: req.body.date_picker_dummy_start,
+            shooting_date_end: req.body.date_picker_dummy_end,
+            time_start: req.body.time_form,
+            time_end: req.body.time_form,
+            status: req.body.status_selector,
+            assignment: req.body.assignment_selector,
+            type: req.body.type
+        };
+        if (err) {
+            res.redirect('error');
+        }
+        var nRoom = 0;
+        var nAss = 0;
+        var roomArray = [];
+        var equipArray = [];
+        var arrayNumberEquip = [];
+        var equipData = [];
+        var assData = [];
+        for (var key in req.body) {
+            if (req.body.hasOwnProperty(key)) {
+                if (key == "equip_item") {
+                    var equipString = req.body[key];
+                    for (var i = 0; i < equipString.length; i++) {
+                        var equipName = equipString[i].slice(0, equipString.lastIndexOf("&") - 1);
+                        var equipNumber = equipString[i].slice(equipString.lastIndexOf("&"), equipString[i].length);
+                        equipData.push([id, equipName, equipNumber]);
+                    }
+                }
+                if (key.slice(0, 4) == "room") {
+                    if (req.body[key] != "None") {
+                        roomArray.push([id, req.body[key], 'hello']);
+                    }
+                }
+                if (key == "assistant_form") {
+                    var assistString = req.body[key];
+                    if (typeof assistString == "string") {
+                        assData.push([id, req.body[key], "shootdee"]);
+                    } else {
+                        for (var i = 0; i < assistString.length; i++) {
+                            if (req.body[key][i].trim().length > 0) {
+                                assData.push([id, req.body[key][i], "shootdee"]);
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+        connection.query('UPDATE booking SET? WHERE QID=?', [data, id], function(err, row, field) { // main data all QID and stuff
+            if (err) {
+                console.log("can't insert booking with error code " + err);
+            } else {
+                console.log("edit booking complete");
+            }
+        });
+        connection.query('DELETE FROM assistance WHERE QID=?', [id], function(err, row, field) {
+            connection.query('INSERT INTO assistance(QID,assistance,type) VALUE?', [assData], function(err, row, field) {
+                if (err) {
+                    console.log("can't insert assistant with error code " + err);
+                } else {
+                    console.log("insert assistant complete");
+                }
+            });
+        });
+        connection.query('DELETE FROM booking_use_n_equip WHERE QID=?', [id], function(err, row, field) {
+            connection.query('INSERT INTO booking_use_n_equip(QID,name_equipment,amount) VALUE?', [equipData], function(err, row, field) {
+                if (err) {
+                    console.log("can't insert booking_use_n_equip with error code " + err);
+                } else {
+                    console.log("insert booking_use_n_equip complete.")
+
+                }
+
+            });
+        });
+
+        connection.query('DELETE FROM booking_use_room WHERE QID=?', [id], function(err, row, field) {
+            if (roomArray.length != 0) { // if equipment rental not choosen
+                connection.query('INSERT INTO booking_use_room(QID,RID, lighting) VALUE?', [roomArray], function(err, row, field) {
+                    if (err) {
+                        console.log("can't insert room_booking with error code " + err);
+                    } else {
+                        console.log("insert booking_use_room complete.")
+                        res.redirect('confirm_edit_queue');
+                    }
+                });
+            } else {
+                res.redirect('error');
+            }
+        });
+
+    });
+
+});
 
 
 router.post('/queues', function(req, res, next) {
@@ -518,6 +782,16 @@ function clone(obj) {
     }
     return copy;
 }
+String.prototype.shuffle = function() {
 
+    var that = this.split("");
+    var len = that.length,
+        t, i
+    while (len) {
+        i = Math.random() * len-- | 0;
+        t = that[len], that[len] = that[i], that[i] = t;
+    }
+    return that.join("");
+};
 //export the routers
 module.exports = router;

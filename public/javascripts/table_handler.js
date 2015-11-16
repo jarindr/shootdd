@@ -4,6 +4,7 @@ $(document).ready(function() {
     $('.queue_data').load('queue_table?data=' + current).hide().fadeIn();
     $('#next').click(function() {
         current++;
+        console.log(current);
         $('.queue_data').fadeOut("fast", function() {
             $(this).load('queue_table?data=' + current).hide().fadeIn();
         });

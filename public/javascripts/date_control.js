@@ -1,9 +1,9 @@
 setDatePicker();
 setTime("30");
+setOT("30");
 
 function setDatePicker() {
     var date = new Date();
-    console.log(date);
     var year = date.getFullYear().toString();
     var month = date.getMonth() + 1;
     var day = date.getDate().toString();
@@ -29,7 +29,6 @@ function setDatePicker() {
         end_date = end.format('YYYY-MM-DD');
         $('#date_picker_dummy_start').val(start_date);
         $('#date_picker_dummy_end').val(end_date);
-        console.log(date_format);
     });
     $('#basic-addon1').click(function() {
         $('#date_picker').click();
@@ -57,6 +56,35 @@ function setTime(interval) { // set the time dropdown in newqueue
             var time_form = $("#time_form");
             html.appendTo(time_form);
             if (i == 24 && min == "00") {
+                break;
+            }
+        }
+
+
+    }
+}
+
+function setOT(interval) {
+    var min = 0;
+    var hr = 0;
+    var html;
+    for (var i = 0; i <= 5; i++) {
+        for (var j = 0; j < 2; j++) {
+            if (j == 0) {
+                min = "00";
+            } else {
+                min = interval;
+            }
+            if (i < 10) {
+                hr = "0" + i;
+            } else {
+                hr = i;
+            }
+            var temp = hr + "." + min;
+            html = $("<option value='" + temp + "'>" + hr + "." + min + " HR" + "</option>");
+            var ot_form = $("#ot_form");
+            html.appendTo(ot_form);
+            if (i == 5 && min == "00") {
                 break;
             }
         }

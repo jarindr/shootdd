@@ -16,14 +16,23 @@ var click = false;
 var equip_amount = [];
 var runner = 0;
 var auto_add_detail = true;
+var WLP_arr = ["Pro-8a 2400 AirEUR", "Century Stand", "ProHead", "Profoto Air Remote"];
+var WLP_val = [2, 4, 4, 1];
+var WLB_arr = ["Broncolor ScoroE 3200", "Century Stand", "Lamp Base Pulso G+reflector", "Transceiver RSF2 Broncolor"];
+var WLB_val = [2, 4, 4, 1];
+var WLP = {};
+var WLB = {};
+var supplierArray = [];
+var rented_e = {};
 $(document).ready(function() {
     setMenuClicked();
     $(".btn").mouseup(function() {
         $(this).blur();
-    })
+    });
     $.getJSON('http://localhost:3000/dump_equipment_data', function(data) {
         $.each(data, function(key, value) {
             var type = value.type;
+
             typeArray.push(type);
         });
         typeArray = typeArray.filter(function(item, pos) { // make unique
@@ -32,7 +41,6 @@ $(document).ready(function() {
         var k = 0;
         for (var i = 0; i < typeArray.length; i++) {
             equipArray[i] = [];
-            count[i] = [];
             for (var j = 0; j < data.length; j++) {
                 if (typeArray[i] == data[j].type) {
                     equipArray[i][k] = data[j].description;
@@ -41,7 +49,23 @@ $(document).ready(function() {
             }
             k = 0;
         }
-        $("#add_detail").click();
+        $.getJSON('http://localhost:3000/dump_rent_equipment', function(data) {
+            $.each(data, function(key, value) {
+                var supplier = value.Supplier;
+                if ($.inArray(supplier, supplierArray) == -1) {
+                    supplierArray.push(supplier);
+                }
+            });
+            for (var i = 0; i < supplierArray.length; i++) {
+                rented_e[supplierArray[i]] = [];
+                console.log(rented_e);
+            }
+            $.each(data, function(key, value) {
+                rented_e[value.Supplier].push(value.description);
+            });
+            $("#add_detail").click();
+
+        });
     });
 
     $("#add_assistant").click(function() { // set adding assistance
@@ -85,7 +109,7 @@ $(document).ready(function() {
                 return false;
             }
         });
-        reCheckRoomOption()
+        reCheckRoomOption();
         html.hide().show('fast');
         room_counter++;
     });
@@ -105,7 +129,7 @@ $(document).ready(function() {
         $('.list-group-item').each(function(i, obj) {
             var item = $(this).text().substring(0, $(this).text().lastIndexOf("+"));
             var val = $(this).find('input').val();
-            form_html += "<div class='form-group'><input type='text' class='form-control' name='equip_item' value='" + item + "&" + val + "'" + " style='display:none;'></div>";
+            form_html += "<input type='text' name='equip_item' value='" + item + "&" + val + "'" + " style='display:none;'></div>";
         });
         var $form_html = $(form_html);
         $form_html.appendTo($(".form-horizontal"));
@@ -122,26 +146,25 @@ $(document).ready(function() {
                     "<h1>More detail</h1></div>");
                 html.appendTo(ac);
                 html = "";
-                var indexTypeArray = 0;
-                var rent_code = "<div class='form-group' style='margin-top:3%;'> " +
-                    "<label class='col-sm-2 control-label'>Supplier :</label> " +
-                    "<div class='col-sm-5'> " +
-                    "<input type='text' class='form-control' id='client-form' placeholder='supplier name...'> " +
-                    "</div> " +
-                    "<label class='col-sm-1 control-label'>Price :</label> " +
-                    "<div class='col-sm-2'> " +
-                    "<input type='number' class='form-control' id='client-form' placeholder='Price...'> " +
-                    "</div> " +
-                    "</div> " +
-                    "<div class='form-group'> " +
-                    "<label class='col-sm-2 control-label'>Description :</label> " +
-                    "<div class='col-sm-5'> " +
-                    "<input type='text' class='form-control' id='client-form' placeholder='description...'> " +
-                    "</div> " +
-                    "<label class='col-sm-2 control-label'>Quantity :</label> " +
-                    "<div class='col-sm-1'> " +
-                    "<input type='text' class='form-control' id='client-form' placeholder='from...'> " +
-                    "</div> " +
+                var rent_code = "<div class='rent-group'>";
+                rent_code += "<div class='form-group' style='margin-top:3%;'><label class='col-sm-2 control-label'>Supplier :</label>" +
+                    "<div class='col-sm-5'>";
+                rent_code += "<select class='form-control' id='supplier_selector' name='supplier_selector'>";
+                $.each(supplierArray, function(index, val) {
+                    rent_code += "<option>" + val + "</option>"
+                });
+                rent_code += "</select>" +
+                    "</div>" +
+                    "</div>";
+                rent_code += "<div class='form-group'><label class='col-sm-2 control-label'>Description :</label>" +
+                    "<div class='col-sm-5'>";
+                rent_code += "<select class='form-control' id='description_selector' name='description-selector'>";
+                $.each(supplierArray, function(index, val) {
+                    rent_code += "<option>" + rented_e[val][0] + "</option>"
+                });
+                rent_code += "</select>" +
+                    "</div>" +
+                    "</div>" +
                     "</div>";
                 for (var j = 1; j <= 3; j++) {
                     codes = codes + "<div class='col-sm-4'style='margin-bottom: 2%;'>";
@@ -160,11 +183,10 @@ $(document).ready(function() {
                             "aria-labelledby='heading" + nType + "'> " +
                             "<ul class='list-group'> ";
                         for (var x = 0; x < equipArray[nType].length; x++) {
-                            codes += "<li class='list-group-item'>" + equipArray[nType][x] +
+                            codes += "<li class='list-group-item' style='color:#979696; background-color:#C0C0C0;'>" + equipArray[nType][x] +
                                 "<div id='button' class='button_decrease'> + </div> " +
                                 "<input type='text' class='value_equip' value='0'> " +
                                 "<div id='button' class='button_increase'> - </div></li> ";
-                            runner++;
                         }
                         codes += "</ul></div></div>";
                         nType++;
@@ -179,14 +201,14 @@ $(document).ready(function() {
                 html2 = $("<div class='form-group'>" +
                     "<label class='col-sm-2 control-label'>Studio type :</label>" +
                     "<div class='checkbox col-sm-2' style='margin-right: 0'>" +
-                    "<label> <input type='checkbox'checked='true'> With lighting Prophoto</label> </div> " +
+                    "<label> <input type='checkbox'> With lighting Prophoto</label> </div> " +
                     "<div class='checkbox col-sm-2'> " +
                     "<label> " +
                     "<input type='checkbox'> With lighting Broncolor</label> " +
                     "</div> " +
                     "<div class='checkbox col-sm-2'> " +
                     "<label> " +
-                    "<input type='checkbox'> No lighting </label> " +
+                    "<input type='checkbox'checked='true'> No lighting </label> " +
                     "</div> " +
                     "</div>" +
                     "<div><ul class='nav nav-tabs' role='tablist'> " +
@@ -207,6 +229,16 @@ $(document).ready(function() {
             ac.hide('fast');
             $(this).text("More detail");
         }
+        $("#accordion").on("change", "#supplier_selector", function() {
+            var val = $(this).val();
+            console.log($(this).parent().parent().parent().find("#description_selector").empty());
+            var se = $(this).parent().parent().parent().find("#description_selector");
+            var options = ""
+            $.each(rented_e[val], function(index, val) {
+                options += "<option>" + val + "</option>"
+            });
+            $(options).appendTo(se);
+        });
     });
     $(document).on("click", "#button", function() { // accordion for binding event click on + - button update value
         var $button = $(this);
@@ -221,8 +253,19 @@ $(document).ready(function() {
                 newVal = 0;
             }
         }
-
         $button.parent().find("input").val(newVal);
+        if (newVal == "0") {
+            $button.parent().css({
+                "color": "#979696",
+                "background-color": "#C0C0C0"
+            });
+        } else {
+            $button.parent().css({
+                "color": "black",
+                "background-color": "white"
+            });
+
+        }
 
 
     });
@@ -311,14 +354,14 @@ $(document).ready(function() {
         } else {
             html = $("<label class='col-sm-2 control-label'>Studio type :</label>" +
                 "<div class='checkbox col-sm-2' style='margin-right: 0'>" +
-                "<label> <input type='checkbox'checked='true'> With lighting Prophoto</label> </div> " +
+                "<label> <input type='checkbox'> With lighting Prophoto</label> </div> " +
                 "<div class='checkbox col-sm-2'> " +
                 "<label> " +
                 "<input type='checkbox'> With lighting Broncolor</label> " +
                 "</div> " +
                 "<div class='checkbox col-sm-2'> " +
                 "<label> " +
-                "<input type='checkbox'> No lighting </label> " +
+                "<input type='checkbox' checked='true'> No lighting </label> " +
                 "</div>");
             html.appendTo($(".panel-group").find(".form-group").empty());
             $(".nav-tabs").show();
@@ -326,10 +369,60 @@ $(document).ready(function() {
         }
 
     });
+    setInitValEquip();
+
+    function resetValEqiup() {
+        $(".list-group-item").find('.value_equip').each(function(index, el) {
+            $(el).val(0);
+            $(el).parent().css({
+                "color": "#979696",
+                "background-color": "#C0C0C0"
+            });
+        });
+    }
     $("#accordion").on("change", "input:checkbox", function() { // only one check box and be checked
+        resetValEqiup();
         $(this).prop('checked', true);
+        var checked = $(this).parent().text().trim();
+        if (checked == "With lighting Prophoto") {
+            checkEquipVal(WLP);
+        }
+        if (checked == "With lighting Broncolor") {
+            checkEquipVal(WLB);
+        }
+        if (checked == "No lighting") {
+            resetValEqiup();
+        }
         $('input[type="checkbox"]').not(this).prop('checked', false);
+        $('#type').val(checked);
     });
+
+    function checkEquipVal(type) {
+        $(".list-group-item").each(function(index, el) {
+            var eString = $(el).text().trim().slice(0, $(el).text().trim().lastIndexOf('+') - 1);
+            $.each(type, function(key, val) {
+                if (eString == key) {
+                    $(el).find(".value_equip").val(val);
+                    $(el).css({
+                        'background-color': 'white',
+                        'color': 'black'
+                    });
+                }
+            });
+        });
+    }
+
+
+
+    function setInitValEquip() {
+        for (var i = 0; i < WLP_arr.length; i++) {
+            WLP[WLP_arr[i]] = WLP_val[i];
+        }
+        for (var i = 0; i < WLB_arr.length; i++) {
+            WLB[WLB_arr[i]] = WLB_val[i];
+        }
+    }
+
 
     function reCheckRoomOption() {
         var selected = [];
@@ -341,7 +434,6 @@ $(document).ready(function() {
                 }
             });
         });
-        console.log(new_selected);
         $("#room-group-form").find('.form-control').each(function(index, el) {
             $(el).find('option').each(function(index, els) {
                 if ($.inArray($(els).val(), new_selected) != -1) {
@@ -354,5 +446,4 @@ $(document).ready(function() {
             });
         });
     }
-
 });
